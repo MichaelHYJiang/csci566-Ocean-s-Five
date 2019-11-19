@@ -17,7 +17,7 @@ DEBUG = False
 
 
 # train.py ================================================================
-EXP_NAME = '16_bit_HE_to_HE_gt'
+EXP_NAME = 'down_sampled'
 CHECKPOINT_DIR = './1_checkpoint/' + EXP_NAME + '/'
 RESULT_DIR = './2_result/' + EXP_NAME + '/'
 LOGS_DIR = RESULT_DIR
@@ -27,14 +27,14 @@ VAL_LOG_DIR = 'val'
 ALL_FRAME = 200
 SAVE_FRAMES = list(range(0, ALL_FRAME, 32))
 CROP_FRAME = 16
-CROP_HEIGHT = 256
-CROP_WIDTH = 256
+CROP_HEIGHT = 128
+CROP_WIDTH = 128
 
 SAVE_FREQ = 5
-MAX_EPOCH = 50
+MAX_EPOCH = 60
 
-FRAME_FREQ = 1
-GROUP_NUM = 4
+FRAME_FREQ = 4
+GROUP_NUM = 10
 
 INIT_LR = 1e-4
 DECAY_LR = 1e-5
