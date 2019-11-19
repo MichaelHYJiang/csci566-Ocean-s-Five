@@ -17,7 +17,7 @@ DEBUG = False
 
 
 # train.py ================================================================
-EXP_NAME = 'down_sampled'
+EXP_NAME = 'down_sampled_he2he'
 CHECKPOINT_DIR = './1_checkpoint/' + EXP_NAME + '/'
 RESULT_DIR = './2_result/' + EXP_NAME + '/'
 LOGS_DIR = RESULT_DIR
@@ -34,7 +34,7 @@ SAVE_FREQ = 5
 MAX_EPOCH = 60
 
 FRAME_FREQ = 4
-GROUP_NUM = 10
+GROUP_NUM = 12
 
 INIT_LR = 1e-4
 DECAY_LR = 1e-5
