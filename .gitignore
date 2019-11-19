@@ -107,7 +107,7 @@ venv.bak/
 /0_data
 /1_checkpoint
 /2_result
-*_list
+*list*
 *.mp4
 tmp*
 command_line_result*
