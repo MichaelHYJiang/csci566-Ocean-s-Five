@@ -57,7 +57,17 @@ def network(input, depth=3, channel=32, prefix=''):
 
             conv5 = slim.conv3d(pool4, channel * 16, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv5_1')
             conv5 = slim.conv3d(conv5, channel * 16, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv5_2')
+            net = conv5
+            for i in range(16):
+                temp = net
+                net = slim.conv3d(net, channel * 16, [3, 3, 3], rate=1, activation_fn=lrelu,
+                                  scope=prefix + 'g_res%d_conv1' % i)
+                net = slim.conv3d(net, channel * 16, [3, 3, 3], rate=1, activation_fn=None,
+                                  scope=prefix + 'g_res%d_conv2' % i)
+                net = net + temp
 
+            net = slim.conv3d(net, channel * 16, [3, 3, 3], activation_fn=None, scope=prefix + 'g_res')
+            conv5 = net + conv5
             up6 = upsample_and_concat(conv5, conv4, channel * 8, channel * 16)
             conv6 = slim.conv3d(up6, channel * 8, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv6_1')
             conv6 = slim.conv3d(conv6, channel * 8, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv6_2')
