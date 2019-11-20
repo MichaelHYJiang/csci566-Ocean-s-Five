@@ -157,7 +157,7 @@ def main():
 
     np.random.seed(ord('c') + 137)
     count = 0
-    for epoch in range(lastepoch, MAX_EPOCH + 1):
+    for epoch in range(lastepoch + 1, MAX_EPOCH + 1):
         if epoch % SAVE_FREQ == 0:
             save_results = True
             if not os.path.isdir(RESULT_DIR + '%04d' % epoch):
