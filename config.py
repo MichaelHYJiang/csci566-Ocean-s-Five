@@ -36,8 +36,8 @@ MAX_EPOCH = 400
 FRAME_FREQ = 4
 GROUP_NUM = 12
 
-INIT_LR = 1e-5
-DECAY_LR = 1e-6
+INIT_LR = 1e-4
+DECAY_LR = 1e-5
 DECAY_EPOCH = 200
 
 # test.py ================================================================
