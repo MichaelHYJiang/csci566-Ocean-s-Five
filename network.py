@@ -44,6 +44,17 @@ def network(input, depth=3, channel=32, prefix=''):
     conv3 = slim.conv3d(pool2, channel * 4, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv3_1')
     conv3 = slim.conv3d(conv3, channel * 4, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv3_2')
     if depth == 2:
+        net = conv3
+        for i in range(16):
+            temp = net
+            net = slim.conv3d(net, channel * 16, [3, 3, 3], rate=1, activation_fn=lrelu,
+                              scope=prefix + 'g_res%d_conv1' % i)
+            net = slim.conv3d(net, channel * 16, [3, 3, 3], rate=1, activation_fn=None,
+                              scope=prefix + 'g_res%d_conv2' % i)
+            net = net + temp
+
+        net = slim.conv3d(net, channel * 16, [3, 3, 3], activation_fn=None, scope=prefix + 'g_res')
+        conv3 = net + conv3
         up8 = upsample_and_concat(conv3, conv2, channel * 2, channel * 4)
     else:
         pool3 = tf.expand_dims(slim.max_pool2d(conv3[0], [2, 2], padding='SAME'), axis=0)
@@ -51,6 +62,17 @@ def network(input, depth=3, channel=32, prefix=''):
         conv4 = slim.conv3d(pool3, channel * 8, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv4_1')
         conv4 = slim.conv3d(conv4, channel * 8, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv4_2')
         if depth == 3:
+            net = conv4
+            for i in range(16):
+                temp = net
+                net = slim.conv3d(net, channel * 16, [3, 3, 3], rate=1, activation_fn=lrelu,
+                                  scope=prefix + 'g_res%d_conv1' % i)
+                net = slim.conv3d(net, channel * 16, [3, 3, 3], rate=1, activation_fn=None,
+                                  scope=prefix + 'g_res%d_conv2' % i)
+                net = net + temp
+
+            net = slim.conv3d(net, channel * 16, [3, 3, 3], activation_fn=None, scope=prefix + 'g_res')
+            conv4 = net + conv4
             up7 = upsample_and_concat(conv4, conv3, channel * 4, channel * 8)
         else:
             pool4 = tf.expand_dims(slim.max_pool2d(conv4[0], [2, 2], padding='SAME'), axis=0)
