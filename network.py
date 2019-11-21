@@ -32,58 +32,63 @@ def upsample_and_concat(x1, x2, output_channels, in_channels):
     return tf.expand_dims(deconv_output, axis=0)
 
 
-def hist_conv(input, channel, scope)
-    hist = tf.histogram_fixed_width(input, VALUE_RANGE, nbins=NUM_BINS, dtype=tf.dtypes.int32)
-    ratio = tf.exp(tf.layers.dense(tf.expand_dims(hist, axis=0), 1, activation=tf.nn.tanh))
-    input = tf.math.multiply(input, ratio)
-    conv = slim.conv3d(input, channel, [3, 3, 3], rate=1, activation_fn=lrelu, scope=scope)
-    return conv
+def hist(input):
+    hist = tf.histogram_fixed_width(input, VALUE_RANGE, nbins=NUM_BINS)
+    hist = tf.cast(hist, tf.float32)
+    hist = hist / tf.reduce_max(hist)
+    # hidden = tf.layers.dense(tf.expand_dims(hist, axis=0), 256, activation=tf.nn.tanh)
+    # exp = tf.layers.dense(hidden, 1, activation=tf.nn.tanh)
+    exp = tf.layers.dense(tf.expand_dims(hist, axis=0), 1, activation=tf.nn.tanh)
+    ratio = tf.exp(exp)
+    input = tf.multiply(input, ratio)
+    return input
 
 
 # 3D-Conv-2D-Pool UNet
 def network(input, depth=3, channel=32, prefix=''):
     depth = min(max(depth, 2), 4)
 
-    conv1 = hist_conv(input, channel, prefix + 'g_conv1_1')
-    conv1 = hist_conv(conv1, channel, prefix + 'g_conv1_2')
+    input = hist(input)
+    conv1 = slim.conv3d(input, channel, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv1_1')
+    conv1 = slim.conv3d(conv1, channel, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv1_2')
     pool1 = tf.expand_dims(slim.max_pool2d(conv1[0], [2, 2], padding='SAME'), axis=0)
 
-    conv2 = hist_conv(pool1, channel * 2, prefix + 'g_conv2_1')
-    conv2 = hist_conv(conv2, channel * 2, prefix + 'g_conv2_2')
+    conv2 = slim.conv3d(pool1, channel * 2, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv2_1')
+    conv2 = slim.conv3d(conv2, channel * 2, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv2_2')
     pool2 = tf.expand_dims(slim.max_pool2d(conv2[0], [2, 2], padding='SAME'), axis=0)
 
-    conv3 = hist_conv(pool2, channel * 4, prefix + 'g_conv3_1')
-    conv3 = hist_conv(conv3, channel * 4, prefix + 'g_conv3_2')
+    conv3 = slim.conv3d(pool2, channel * 4, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv3_1')
+    conv3 = slim.conv3d(conv3, channel * 4, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv3_2')
     if depth == 2:
         up8 = upsample_and_concat(conv3, conv2, channel * 2, channel * 4)
     else:
         pool3 = tf.expand_dims(slim.max_pool2d(conv3[0], [2, 2], padding='SAME'), axis=0)
 
-        conv4 = hist_conv(pool3, channel * 8, prefix + 'g_conv4_1')
-        conv4 = hist_conv(conv4, channel * 8, prefix + 'g_conv4_2')
+        conv4 = slim.conv3d(pool3, channel * 8, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv4_1')
+        conv4 = slim.conv3d(conv4, channel * 8, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv4_2')
         if depth == 3:
             up7 = upsample_and_concat(conv4, conv3, channel * 4, channel * 8)
         else:
             pool4 = tf.expand_dims(slim.max_pool2d(conv4[0], [2, 2], padding='SAME'), axis=0)
 
-            conv5 = hist_conv(pool4, channel * 16, prefix + 'g_conv5_1')
-            conv5 = hist_conv(conv5, channel * 16, prefix + 'g_conv5_2')
+            conv5 = slim.conv3d(pool4, channel * 16, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv5_1')
+            conv5 = slim.conv3d(conv5, channel * 16, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv5_2')
 
             up6 = upsample_and_concat(conv5, conv4, channel * 8, channel * 16)
-            conv6 = hist_conv(up6, channel * 8, prefix + 'g_conv6_1')
-            conv6 = hist_conv(conv6, channel * 8, prefix + 'g_conv6_2')
+            conv6 = slim.conv3d(up6, channel * 8, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv6_1')
+            conv6 = slim.conv3d(conv6, channel * 8, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv6_2')
 
             up7 = upsample_and_concat(conv6, conv3, channel * 4, channel * 8)
-        conv7 = hist_conv(up7, channel * 4, prefix + 'g_conv7_1')
-        conv7 = hist_conv(conv7, channel * 4, prefix + 'g_conv7_2')
+        conv7 = slim.conv3d(up7, channel * 4, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv7_1')
+        conv7 = slim.conv3d(conv7, channel * 4, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv7_2')
 
         up8 = upsample_and_concat(conv7, conv2, channel * 2, channel * 4)
-    conv8 = hist_conv(up8, channel * 2, prefix + 'g_conv8_1')
-    conv8 = hist_conv(conv8, channel * 2, prefix + 'g_conv8_2')
+    conv8 = slim.conv3d(up8, channel * 2, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv8_1')
+    conv8 = slim.conv3d(conv8, channel * 2, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv8_2')
 
     up9 = upsample_and_concat(conv8, conv1, channel, channel * 2)
-    conv9 = hist_conv(up9, channel, prefix + 'g_conv9_1')
-    conv9 = hist_conv(conv9, channel, prefix + 'g_conv9_2')
+    conv9 = slim.conv3d(up9, channel, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv9_1')
+    conv9 = slim.conv3d(conv9, channel, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv9_2')
 
     conv10 = slim.conv3d(conv9, 12, [1, 1, 1], rate=1, activation_fn=None, scope=prefix + 'g_conv10')
 
