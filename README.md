@@ -5,7 +5,7 @@
 ## Baseline Version
 
 ### Download dataset from Google cloud first.
-### Put it in 0_data directory and unzip it.
+### Put it in *0_data* directory and unzip it.
 
 ### Generate file lists
 ```Shell
@@ -24,4 +24,4 @@ train loss=0.02925395
 
 validation loss=0.03194653
 
-Detailed baseline results: https://drive.google.com/file/d/1f4k8zhomFuZt820bN8gl3zbw8lyvcxg0/view?usp=sharing
+Detailed baseline results: https://drive.google.com/file/d/1DLVLR_MRh65gQV7GYVfXjNUma0v7J0PI/view?usp=sharing
