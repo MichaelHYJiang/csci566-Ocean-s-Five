@@ -84,7 +84,7 @@ def process_video(sess, in_image, out_image, in_file, raw, out_file=None):
     scaling_factor = max_val
     val_type = 'uint16'
     
-    input_patch = equalize_histogram(input_patch, int(max_val) + 1)
+    # input_patch = equalize_histogram(input_patch, int(max_val) + 1)
     
     
     done = False
