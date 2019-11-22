@@ -1,7 +1,7 @@
 import glob, os
 import numpy as np
 
-train_dir = 'train'
+train_dir = 'train_he'
 gt_dir = 'gt_he'
 
 files = os.listdir('./0_data/' + train_dir + '/')
