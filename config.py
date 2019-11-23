@@ -17,7 +17,7 @@ DEBUG = False
 
 
 # train.py ================================================================
-EXP_NAME = 'down_sampled_he2he'
+EXP_NAME = 'down_sampled_he2he_FrameFreq2'
 CHECKPOINT_DIR = './1_checkpoint/' + EXP_NAME + '/'
 RESULT_DIR = './2_result/' + EXP_NAME + '/'
 LOGS_DIR = RESULT_DIR
@@ -31,14 +31,14 @@ CROP_HEIGHT = 128
 CROP_WIDTH = 128
 
 SAVE_FREQ = 5
-MAX_EPOCH = 100
+MAX_EPOCH = 60
 
-FRAME_FREQ = 1
+FRAME_FREQ = 2
 GROUP_NUM = 12
 
 INIT_LR = 1e-4
 DECAY_LR = 1e-5
-DECAY_EPOCH = 100
+DECAY_EPOCH = 30
 
 # test.py ================================================================
 TEST_CROP_FRAME = 32
