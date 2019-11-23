@@ -45,10 +45,10 @@ def hist(input):
 
 
 # 3D-Conv-2D-Pool UNet
-def network(input, depth=3, channel=32, prefix=''):
+def network(input, depth=2, channel=32, prefix=''):
     depth = min(max(depth, 2), 4)
 
-    input = hist(input)
+    # input = hist(input)
     conv1 = slim.conv3d(input, channel, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv1_1')
     conv1 = slim.conv3d(conv1, channel, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv1_2')
     pool1 = tf.expand_dims(slim.max_pool2d(conv1[0], [2, 2], padding='SAME'), axis=0)
