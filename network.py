@@ -10,7 +10,7 @@
 import tensorflow as tf
 import tensorflow.contrib.slim as slim
 
-from config import DEBUG
+from config import DEBUG, CROP_FRAME
 
 
 # leaky ReLU
@@ -31,76 +31,94 @@ def upsample_and_concat(x1, x2, output_channels, in_channels):
 
 # 3D-Conv-2D-Pool UNet
 def network(input, depth=3, channel=32, prefix=''):
-    depth = min(max(depth, 2), 4)
+    with tf.variable_scope('gen',reuse=tf.AUTO_REUSE):
+        depth = min(max(depth, 2), 4)
 
-    conv1 = slim.conv3d(input, channel, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv1_1')
-    conv1 = slim.conv3d(conv1, channel, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv1_2')
-    pool1 = tf.expand_dims(slim.max_pool2d(conv1[0], [2, 2], padding='SAME'), axis=0)
+        conv1 = slim.conv3d(input, channel, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv1_1')
+        conv1 = slim.conv3d(conv1, channel, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv1_2')
+        pool1 = tf.expand_dims(slim.max_pool2d(conv1[0], [2, 2], padding='SAME'), axis=0)
 
-    conv2 = slim.conv3d(pool1, channel * 2, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv2_1')
-    conv2 = slim.conv3d(conv2, channel * 2, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv2_2')
-    pool2 = tf.expand_dims(slim.max_pool2d(conv2[0], [2, 2], padding='SAME'), axis=0)
+        conv2 = slim.conv3d(pool1, channel * 2, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv2_1')
+        conv2 = slim.conv3d(conv2, channel * 2, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv2_2')
+        pool2 = tf.expand_dims(slim.max_pool2d(conv2[0], [2, 2], padding='SAME'), axis=0)
 
-    conv3 = slim.conv3d(pool2, channel * 4, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv3_1')
-    conv3 = slim.conv3d(conv3, channel * 4, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv3_2')
-    if depth == 2:
-        up8 = upsample_and_concat(conv3, conv2, channel * 2, channel * 4)
-    else:
-        pool3 = tf.expand_dims(slim.max_pool2d(conv3[0], [2, 2], padding='SAME'), axis=0)
-
-        conv4 = slim.conv3d(pool3, channel * 8, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv4_1')
-        conv4 = slim.conv3d(conv4, channel * 8, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv4_2')
-        if depth == 3:
-            up7 = upsample_and_concat(conv4, conv3, channel * 4, channel * 8)
+        conv3 = slim.conv3d(pool2, channel * 4, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv3_1')
+        conv3 = slim.conv3d(conv3, channel * 4, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv3_2')
+        if depth == 2:
+            up8 = upsample_and_concat(conv3, conv2, channel * 2, channel * 4)
         else:
-            pool4 = tf.expand_dims(slim.max_pool2d(conv4[0], [2, 2], padding='SAME'), axis=0)
+            pool3 = tf.expand_dims(slim.max_pool2d(conv3[0], [2, 2], padding='SAME'), axis=0)
 
-            conv5 = slim.conv3d(pool4, channel * 16, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv5_1')
-            conv5 = slim.conv3d(conv5, channel * 16, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv5_2')
+            conv4 = slim.conv3d(pool3, channel * 8, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv4_1')
+            conv4 = slim.conv3d(conv4, channel * 8, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv4_2')
+            if depth == 3:
+                up7 = upsample_and_concat(conv4, conv3, channel * 4, channel * 8)
+            else:
+                pool4 = tf.expand_dims(slim.max_pool2d(conv4[0], [2, 2], padding='SAME'), axis=0)
 
-            up6 = upsample_and_concat(conv5, conv4, channel * 8, channel * 16)
-            conv6 = slim.conv3d(up6, channel * 8, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv6_1')
-            conv6 = slim.conv3d(conv6, channel * 8, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv6_2')
+                conv5 = slim.conv3d(pool4, channel * 16, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv5_1')
+                conv5 = slim.conv3d(conv5, channel * 16, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv5_2')
 
-            up7 = upsample_and_concat(conv6, conv3, channel * 4, channel * 8)
-        conv7 = slim.conv3d(up7, channel * 4, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv7_1')
-        conv7 = slim.conv3d(conv7, channel * 4, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv7_2')
+                up6 = upsample_and_concat(conv5, conv4, channel * 8, channel * 16)
+                conv6 = slim.conv3d(up6, channel * 8, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv6_1')
+                conv6 = slim.conv3d(conv6, channel * 8, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv6_2')
 
-        up8 = upsample_and_concat(conv7, conv2, channel * 2, channel * 4)
-    conv8 = slim.conv3d(up8, channel * 2, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv8_1')
-    conv8 = slim.conv3d(conv8, channel * 2, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv8_2')
+                up7 = upsample_and_concat(conv6, conv3, channel * 4, channel * 8)
+            conv7 = slim.conv3d(up7, channel * 4, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv7_1')
+            conv7 = slim.conv3d(conv7, channel * 4, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv7_2')
 
-    up9 = upsample_and_concat(conv8, conv1, channel, channel * 2)
-    conv9 = slim.conv3d(up9, channel, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv9_1')
-    conv9 = slim.conv3d(conv9, channel, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv9_2')
+            up8 = upsample_and_concat(conv7, conv2, channel * 2, channel * 4)
+        conv8 = slim.conv3d(up8, channel * 2, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv8_1')
+        conv8 = slim.conv3d(conv8, channel * 2, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv8_2')
 
-    conv10 = slim.conv3d(conv9, 12, [1, 1, 1], rate=1, activation_fn=None, scope=prefix + 'g_conv10')
+        up9 = upsample_and_concat(conv8, conv1, channel, channel * 2)
+        conv9 = slim.conv3d(up9, channel, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv9_1')
+        conv9 = slim.conv3d(conv9, channel, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'g_conv9_2')
 
-    out = tf.concat([tf.expand_dims(tf.depth_to_space(conv10[:, i, :, :, :], 2), axis=1) for i in range(conv10.shape[1])], axis=1)
-    if DEBUG:
-        print '[DEBUG] (network.py) conv10.shape, out.shape:', conv10.shape, out.shape
+        conv10 = slim.conv3d(conv9, 12, [1, 1, 1], rate=1, activation_fn=None, scope=prefix + 'g_conv10')
 
-    return out
+        out = tf.concat([tf.expand_dims(tf.depth_to_space(conv10[:, i, :, :, :], 2), axis=1) for i in range(conv10.shape[1])], axis=1)
+        if DEBUG:
+            print '[DEBUG] (network.py) conv10.shape, out.shape:', conv10.shape, out.shape
+
+        return out
 
 
-def loss_network(input, channel=32, prefix=''):
-    conv1 = slim.conv3d(input, channel, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'd_conv1_1')
-    conv1 = slim.conv3d(conv1, channel, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'd_conv1_2')
-    pool1 = tf.expand_dims(slim.max_pool2d(conv1[0], [2, 2], padding='SAME'), axis=0)
+def loss_network(input, channel=8, prefix=''):
+    with tf.variable_scope('dis', reuse=tf.AUTO_REUSE):
+        conv1 = slim.conv2d(input, channel, [3, 3], rate=1, activation_fn=None, scope=prefix + 'd_conv1_1')
+        conv1 = lrelu(tf.layers.batch_normalization(conv1))
+        conv1 = slim.conv2d(conv1, channel, [3, 3], rate=1, activation_fn=None, scope=prefix + 'd_conv1_2')
+        conv1 = lrelu(tf.layers.batch_normalization(conv1))
+        pool1 = slim.conv2d(conv1, channel, [3, 3], stride=2, padding='SAME')
 
-    conv2 = slim.conv3d(pool1, channel * 2, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'd_conv2_1')
-    conv2 = slim.conv3d(conv2, channel * 2, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'd_conv2_2')
-    pool2 = tf.expand_dims(slim.max_pool2d(conv2[0], [2, 2], padding='SAME'), axis=0)
+        conv2 = slim.conv2d(pool1, channel * 2, [3, 3], rate=1, activation_fn=None, scope=prefix + 'd_conv2_1')
+        conv2 = lrelu(tf.layers.batch_normalization(conv2))
+        conv2 = slim.conv2d(conv2, channel * 2, [3, 3], rate=1, activation_fn=None, scope=prefix + 'd_conv2_2')
+        conv2 = lrelu(tf.layers.batch_normalization(conv2))
+        pool2 = slim.conv2d(conv2, channel * 2, [3, 3], stride=2, padding='SAME')
 
-    conv3 = slim.conv3d(pool2, channel * 4, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'd_conv3_1')
-    conv3 = slim.conv3d(conv3, channel * 4, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'd_conv3_2')
-    pool3 = tf.expand_dims(slim.max_pool2d(conv3[0], [2, 2], padding='SAME'), axis=0)
-    
-    conv4 = slim.conv3d(pool3, channel * 8, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'd_conv4_1')
-    conv4 = slim.conv3d(conv4, channel * 8, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'd_conv4_2')
-    pool4 = tf.expand_dims(slim.max_pool2d(conv4[0], [2, 2], padding='SAME'), axis=0)
-    
-    return pool4
+        conv3 = slim.conv2d(pool2, channel * 4, [3, 3], rate=1, activation_fn=None, scope=prefix + 'd_conv3_1')
+        conv3 = lrelu(tf.layers.batch_normalization(conv3))
+        conv3 = slim.conv2d(conv3, channel * 4, [3, 3], rate=1, activation_fn=None, scope=prefix + 'd_conv3_2')
+        conv3 = lrelu(tf.layers.batch_normalization(conv3))
+        pool3 = slim.conv2d(conv3, channel * 4, [3, 3], stride=2, padding='SAME')
+        
+        conv4 = slim.conv2d(pool3, channel * 8, [3, 3], rate=1, activation_fn=None, scope=prefix + 'd_conv4_1')
+        conv4 = lrelu(tf.layers.batch_normalization(conv4))
+        conv4 = slim.conv2d(conv4, channel * 8, [3, 3], rate=1, activation_fn=None, scope=prefix + 'd_conv4_2')
+        conv4 = lrelu(tf.layers.batch_normalization(conv4))
+        pool4 = slim.conv2d(conv4, channel * 8, [3, 3], stride=2, padding='SAME')
+        
+        dim = tf.reduce_prod(tf.shape(pool4)[1:])
+        reshape = tf.reshape(pool4, [CROP_FRAME, dim])
+        
+        fc1 = tf.layers.dense(reshape, 4096, activation=lrelu)
+        fc2 = tf.layers.dense(fc1, 256, activation=lrelu)
+        fc3 = tf.layers.dense(fc2, 1, activation=lrelu)
+        # conv5 = slim.conv2d(pool2, 3, [1, 1], rate=1, activation_fn=None, scope=prefix + 'd_conv5')
+        # return pool4
+        return fc3
 
 
 # test function for network
