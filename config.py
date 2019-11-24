@@ -17,7 +17,7 @@ DEBUG = False
 
 
 # train.py ================================================================
-EXP_NAME = 'down_sampled_he2he'
+EXP_NAME = 'down_sampled_he2he_gan'
 CHECKPOINT_DIR = './1_checkpoint/' + EXP_NAME + '/'
 RESULT_DIR = './2_result/' + EXP_NAME + '/'
 LOGS_DIR = RESULT_DIR
