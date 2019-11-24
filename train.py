@@ -15,7 +15,7 @@ import tensorflow as tf
 import tensorflow.contrib.slim as slim
 from skvideo.io import vwrite
 
-from network import network
+from network import network, loss_network
 from config import *
 
 # get train IDs
@@ -111,11 +111,17 @@ def main():
     sess = tf.Session()
     in_image = tf.placeholder(tf.float32, [None, CROP_FRAME, None, None, 4])
     gt_image = tf.placeholder(tf.float32, [None, CROP_FRAME, None, None, 3])
-    out_image = network(in_image)
+    with tf.variable_scope('gen'):
+        out_image = network(in_image)
     if DEBUG:
         print '[DEBUG] out_image shape:', out_image.shape
 
-    G_loss = tf.reduce_mean(tf.abs(out_image - gt_image))
+    with tf.variable_scope('dis'):
+        loss_out_image = loss_network(out_image)
+        loss_gt_image = loss_network(gt_image)
+    
+    
+    G_loss = tf.reduce_mean(tf.abs(loss_out_image - loss_gt_image))
     v_loss = tf.Variable(0.0)
 
     # tensorboard summary
@@ -127,7 +133,12 @@ def main():
 
     t_vars = tf.trainable_variables()
     lr = tf.placeholder(tf.float32)
-    G_opt = tf.train.AdamOptimizer(learning_rate=lr).minimize(G_loss)
+    dis_var_list = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, 'dis')
+    gen_var_list = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, 'gen')
+    
+    D_opt = tf.train.AdamOptimizer(learning_rate=lr).minimize(-G_loss, var_list=dis_var_list)
+    
+    G_opt = tf.train.AdamOptimizer(learning_rate=lr).minimize(G_loss, var_list=gen_var_list)
 
     saver = tf.train.Saver()
     sess.run(tf.global_variables_initializer())
@@ -210,6 +221,7 @@ def main():
 
                 input_patch = np.minimum(input_patch, 1.0)
 
+                _, G_current, output = sess.run([D_opt, G_loss, out_image], feed_dict={in_image: input_patch, gt_image: gt_patch, lr: learning_rate})
                 _, G_current, output = sess.run([G_opt, G_loss, out_image], feed_dict={in_image: input_patch, gt_image: gt_patch, lr: learning_rate})
                 output = np.minimum(np.maximum(output, 0), 1)
                 g_loss[ind] = G_current
