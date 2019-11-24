@@ -83,6 +83,26 @@ def network(input, depth=3, channel=32, prefix=''):
     return out
 
 
+def loss_network(input, channel=32, prefix=''):
+    conv1 = slim.conv3d(input, channel, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'd_conv1_1')
+    conv1 = slim.conv3d(conv1, channel, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'd_conv1_2')
+    pool1 = tf.expand_dims(slim.max_pool2d(conv1[0], [2, 2], padding='SAME'), axis=0)
+
+    conv2 = slim.conv3d(pool1, channel * 2, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'd_conv2_1')
+    conv2 = slim.conv3d(conv2, channel * 2, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'd_conv2_2')
+    pool2 = tf.expand_dims(slim.max_pool2d(conv2[0], [2, 2], padding='SAME'), axis=0)
+
+    conv3 = slim.conv3d(pool2, channel * 4, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'd_conv3_1')
+    conv3 = slim.conv3d(conv3, channel * 4, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'd_conv3_2')
+    pool3 = tf.expand_dims(slim.max_pool2d(conv3[0], [2, 2], padding='SAME'), axis=0)
+    
+    conv4 = slim.conv3d(pool3, channel * 8, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'd_conv4_1')
+    conv4 = slim.conv3d(conv4, channel * 8, [3, 3, 3], rate=1, activation_fn=lrelu, scope=prefix + 'd_conv4_2')
+    pool4 = tf.expand_dims(slim.max_pool2d(conv4[0], [2, 2], padding='SAME'), axis=0)
+    
+    return pool4
+
+
 # test function for network
 def main():
     sess = tf.Session()
