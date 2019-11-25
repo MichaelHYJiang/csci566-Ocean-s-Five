@@ -56,7 +56,7 @@ all_psnr = 0
 all_ssim = 0
 all_mabd = 0
 
-for output_file in out_files:
+for output_file in output_files:
     out_vid = np.load(output_file)
     gt_file = os.path.basename(output_file)
     gt_vid = np.load('0_data/gt_he/' + gt_file)
