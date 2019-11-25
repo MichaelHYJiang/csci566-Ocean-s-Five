@@ -128,6 +128,8 @@ def process_video(sess, in_image, out_image, in_file, raw, out_file=None):
     print '[PROCESS] Processing done. Saving...',
     t0 = time.time()
     vwrite(TEST_RESULT_DIR + out_file, output)
+    if test_case == 2:
+        np.save(TEST_RESULT_DIR + out_file[:-4] + '.npy', output)
     t1 = time.time()
     print 'done. ({:.3f}s)'.format(t1 - t0)
 
