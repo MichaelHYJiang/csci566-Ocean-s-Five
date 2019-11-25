@@ -39,6 +39,7 @@ GROUP_NUM = 12
 INIT_LR = 1e-4
 DECAY_LR = 1e-5
 DECAY_EPOCH = 30
+NUMPY_RANDOM_SEED = 236
 
 # test.py ================================================================
 TEST_CROP_FRAME = 32
