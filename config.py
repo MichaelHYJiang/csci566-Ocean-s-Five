@@ -1,11 +1,5 @@
 #!/usr/bin/env python
 
-# ----------------------------------------------------------------
-# Configurations for Training and Testing Process
-# Written by Haiyang Jiang
-# Mar 1st 2019
-# ----------------------------------------------------------------
-
 # file lists ================================================================
 FILE_LIST = 'file_list'
 VALID_LIST = 'valid_list'
@@ -13,8 +7,7 @@ TEST_LIST = 'test_list'
 CUSOMIZED_LIST = 'customized_list'
 
 # network.py ================================================================
-DEBUG = False
-
+DEBUG = True
 
 # train.py ================================================================
 EXP_NAME = 'down_sampled_he2he'
@@ -29,17 +22,20 @@ SAVE_FRAMES = list(range(0, ALL_FRAME, 32))
 CROP_FRAME = 16
 CROP_HEIGHT = 128
 CROP_WIDTH = 128
+DARK_REGION_THRESHOLD = 0.03
 
 SAVE_FREQ = 5
-MAX_EPOCH = 60
+MAX_EPOCH = 50
 
 FRAME_FREQ = 4
-GROUP_NUM = 12
+GROUP_NUM = 10
 
 INIT_LR = 1e-4
 DECAY_LR = 1e-5
 DECAY_EPOCH = 30
 NUMPY_RANDOM_SEED = 236
+WL = 4.0
+WH = 1.0
 
 # test.py ================================================================
 TEST_CROP_FRAME = 32
