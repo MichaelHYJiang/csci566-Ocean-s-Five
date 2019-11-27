@@ -69,7 +69,7 @@ def flip(input_patch, gt_patch):
     return input_patch, gt_patch
 
 
-def validate(in_path, gt_path, sess, G_loss, out_image, in_image, gt_image):
+def validate(in_path, gt_path, sess, G_loss, out_image, in_image, gt_image, low_light_threshold, threshold)
     read_in = np.load(in_path)
     
     # 16 bit
@@ -81,7 +81,7 @@ def validate(in_path, gt_path, sess, G_loss, out_image, in_image, gt_image):
 
     input_patch, gt_patch = flip(input_patch, gt_patch)
     input_patch = np.minimum(input_patch, 1.0)
-    loss, output = sess.run([G_loss, out_image], feed_dict={in_image: input_patch, gt_image: gt_patch})
+    loss, output = sess.run([G_loss, out_image], feed_dict={in_image: input_patch, gt_image: gt_patch, low_light_threshold: threshold})
     return loss
 
 
@@ -248,7 +248,7 @@ def main():
         for i in range(len(valid_in_files)):
             in_path = valid_in_files[i]
             gt_path = valid_gt_files[i]
-            loss = validate(in_path, gt_path, sess, G_loss, out_image, in_image, gt_image)
+            loss = validate(in_path, gt_path, sess, G_loss, out_image, in_image, gt_image, low_light_threshold, threshold)
             losses += loss,
         summary = sess.run(summary_op, feed_dict={v_loss:np.mean(losses)})
         writer_val.add_summary(summary, count)
