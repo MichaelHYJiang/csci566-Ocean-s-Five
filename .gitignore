@@ -111,3 +111,4 @@ venv.bak/
 *.mp4
 tmp*
 command_line_result*
+resnetout
