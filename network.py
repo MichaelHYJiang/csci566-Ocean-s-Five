@@ -1,12 +1,5 @@
 #!/usr/bin/env python
 
-# ----------------------------------------------------------------
-# 3D-Convolution and 2D-Pooling UNet
-# Written by Haiyang Jiang
-# Mar 1st 2019
-# ----------------------------------------------------------------
-
-
 import tensorflow as tf
 import tensorflow.contrib.slim as slim
 

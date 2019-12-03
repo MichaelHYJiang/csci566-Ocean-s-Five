@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 
 # ----------------------------------------------------------------
-# 3D-Conv-2D-Pool-UNet Testing Indoor Cases
 # Written by Haiyang Jiang
-# Mar 20th 2019
 # ----------------------------------------------------------------
 
 import os, time

@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 
 # ----------------------------------------------------------------
-# 3D-Conv-2D-Pool-UNet Training
 # Written by Haiyang Jiang
-# Mar 1st 2019
 # ----------------------------------------------------------------
 
 from __future__ import division
