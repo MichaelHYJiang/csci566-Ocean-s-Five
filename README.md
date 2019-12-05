@@ -24,9 +24,7 @@ The extreme dark video enhancements could be applied to many cases nowadays. Som
 However,current solutions to such problem mainly involve near-infrared (NIR) LED or diodes. They help to gain better vision in low-light environments but also introduce drawbacks compared to natural light cameras. Besides, the inevitable energy consumption and heat generation with the presence of extra light sources can increase operation and maintenance costs of a system. More significantly, visible color and texture information could suffer from extensive loss by using such system. Thus, we want to train a dark vedio enhancement network which can dramatically save the maintenance cost and ensure our vedio qualities.
 
 
-<p align="center">
-    <img src="figure/definition.png" height="400"/>,
-</p>
+![Definition](figure/definition.png)
 
 ## Problem Descriptions and Dataset
 Our dataset includes 179 video pairs of street views with moving vehicles and pedestrians under different conditions. Each video pair is of 200 frames taken by a beam splitter. It feeds light into two cameras concurrently and one of them is equipped with a neutral density filter. In this way, we obtain perfect match videos with just light illumination differences. The input format is raw sensor data with Bayer filters to ensure sufficient information against noise level under low light environments. The input, dark videos are chronologically organized raw images. The output, bright videos are in sRGB space, encoded in mp4 format for the convenience of visualizing and post-processing.
@@ -34,15 +32,11 @@ Our dataset includes 179 video pairs of street views with moving vehicles and pe
 A subset of key frames are shown in following figure. Videos in our dataset are down-sampled with a factor of 3 on width and height (i.e. 1/9 of original size), in order to save training and testing time. Sizes of down-sampled
 9 frames are around 340 × 620 pixels. All raw data have been packed and stored in numpy arrays for fast read-in and convenience of processing.
 
-<p align="center">
-    <img src="figure/origin_dataset.png" height="500"/>,
-</p>
+![Data Example](figure/origin_dataset.png)
 
 We also provide a comparison between input frames and their corresponding ground truth frames in Figure 4, to illustrate pixel-level alignment between training input and ground truth. It can be seen from the figure that there are challenges of low contrast, high noise level, and unnatural color mapping in our task. Alignment between frames in input videos (left) and ground truth videos (right). Frames of input videos are linearly scaled to provide more details of objects and noise level.
 
-<p align="center">
-    <img src="figure/origin_dataset2.png" height="350"/>,
-</p>
+![Data Example 2](figure/origin_dataset2.png)
 
 | | Number of video pairs | Number of Frames |
 | --- | --- | --- |
@@ -54,9 +48,7 @@ We also provide a comparison between input frames and their corresponding ground
 
 We use U-Net model as the basic network in our project. The U-Net is originally used for segmentation of images in medical and biomedical fields by using convolutional networks with upsampling functions. For the type of our input data is video, we modify the dimensions of input to the network from 2D to 3D. Hence, we use a 3D-Convolution and 2D-Pooling U-Net and we also control the depth of U-Net between two and four, typically in three. The following figure illustrates the details about our network structure.
 
-<p align="center">
-    <img src="figure/3D-U-Net.png" height="500"/>,
-</p>
+![Network](figure/3D-U-Net.png)
 
 During the training approach, we cut the video data into pieces with cropping and flipping action before feeding it into the network. For example, we select piece of 16 × 256 × 256. In this piece, 16 represents number of frames and 256 represents both height and width. After the training step, we saved the trained model into a file. During the test phase, we load the model again and use it to transfer the new video data to a new generated video by cutting it into pieces just like the size in the training approach. Then we send them into the network and concatenate the output pieces together with a bit overlapping.
 
@@ -107,9 +99,8 @@ In addition to the Baseline model, we also use Histogram Equalization, add GAN, 
 ### Approach3 ResNet
 
 Deep Neural Networks usually face the degradation problem. In this approach we add a residual to the previous value to each block of layers rather than produce an entirely new value. It is easy to represent the identity function. We replace our convolution blocks in Unet with residual blocks and add 1x1x1 convolution projection on input to match dimension.
-<p align="center">
-    <img src="figure/resnet.png" height="400"/>,
-</p>
+
+![Network](figure/3D-U-Net.png)
 
 **Results** 
 
@@ -118,15 +109,11 @@ Deep Neural Networks usually face the degradation problem. In this approach we a
 |Baseline | 0.0292539 | 0.03194653 | 27.203414 | 0.8399437 | 0.727619 |
 |ResNet | 0.02898007 | 0.03173088 | 27.4375552 | 0.841417162 | 0.18700 |
 
-<p align="center">
-    <img src="figure/resnet_result.png" height="500"/>,
-</p>
+![ResNet Training](figure/resnet_result.png)
 
 ### Approach4 GAN
 
-<p align="center">
-    <img src="figure/gan.png" height="400"/>,
-</p>
+![Discriminator](figure/gan.png)
 
 **Results** 
 
@@ -141,7 +128,7 @@ Deep Neural Networks usually face the degradation problem. In this approach we a
 - [Tensorflow 1.1.14](https://www.tensorflow.org/versions/r1.14/api_docs/python/tf)
 - [NumPy](http://www.numpy.org/)
 - [scikit-video](http://www.scikit-video.org/stable/io.html)
-- [cv2](https://pypi.org/project/opencv-python/)
+- [OpenCV2](https://pypi.org/project/opencv-python/)
 
 ## Usage
 
@@ -175,8 +162,11 @@ test_case can be:
 All cases save mp4 output videos, while case 2 saves extra npy results.
 
 ## References
-* [Learning to see in the dark](https://arxiv.org/pdf/1805.01934.pdf). Chen Chen, Qifeng Chen, Jia Xu and Vladlen Koltun. The IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2018.
-* [MBLLEN: low-light image/video enhancement using cnns](http://bmvc2018.org/contents/papers/0700.pdf). Feifan Lv, Feng Lu, Jianhua Wu, and Chongsoon Lim. In British Machine Vision Conference 2018, BMVC 2018, Northumbria University, Newcastle, UK, September 3-6, 2018, page 220. BMVA Press, 2018.
+[1] [Learning to See in the Dark](https://arxiv.org/pdf/1805.01934.pdf). Chen Chen, Qifeng Chen, Jia Xu and Vladlen Koltun. The IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2018.
+
+[2] [MBLLEN: Low-Light Image/Video Enhancement Using CNNs](http://bmvc2018.org/contents/papers/0700.pdf). Feifan Lv, Feng Lu, Jianhua Wu, and Chongsoon Lim. In British Machine Vision Conference 2018, BMVC 2018, Northumbria University, Newcastle, UK, September 3-6, 2018, page 220. BMVA Press, 2018.
+
+[3] [Learning to See Moving Objects in the Dark](http://openaccess.thecvf.com/content_ICCV_2019/papers/Jiang_Learning_to_See_Moving_Objects_in_the_Dark_ICCV_2019_paper.pdf). Haiyang Jiang and Yinqiang Zheng.  Learning to see moving objects in the dark.  The IEEE International Conference on Computer Vision (ICCV), October 2019.
 
 ## Author
 **Ocean's Five**
