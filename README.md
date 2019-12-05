@@ -236,6 +236,16 @@ python generate_file_list.py
 python train.py
 ```
 
+	We also uploaded our best model to a google drive. One can skip training by:
+```Shell
+python download_models.py
+```
+
+	There are three videos as toy examples uploaded to a google drive. Download them with:
+```Shell
+python download_dataset.py
+```
+ 
 4. #### Testing
 ```Shell
 python test.py [test_case]
