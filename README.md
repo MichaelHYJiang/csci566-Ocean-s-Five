@@ -73,7 +73,7 @@ Videos in our training set had been histogram equalized before being saved as np
 
 ![Network](figure/3D-U-Net.png)
 
-**Training. ** Theoretically, FCNs like U-Net can take in inputs with arbitrary sizes, since there are only conv, pool, deconv layers, no fully connected layers. However, we had to crop the input into small pieces due to the GPU memory limitation. The crop size we used is 16 × 128 × 128. 16 represents number of frames and 128 represents height and width. Random flipping and transpose on spatial dimensions were carried out for data augmentation purpose. We used Adam optimizer with default parameters (except for learning rate). Loss function is L1 loss between output videos and corresponding areas in ground truth. Initial learning rate is 10^-4, and it decays to 10^-5 after 30 epochs. Entire training process proceeded for 60 epoches. This setting is defined as our Baseline Approach.
+**Training.** Theoretically, FCNs like U-Net can take in inputs with arbitrary sizes, since there are only conv, pool, deconv layers, no fully connected layers. However, we had to crop the input into small pieces due to the GPU memory limitation. The crop size we used is 16 × 128 × 128. 16 represents number of frames and 128 represents height and width. Random flipping and transpose on spatial dimensions were carried out for data augmentation purpose. We used Adam optimizer with default parameters (except for learning rate). Loss function is L1 loss between output videos and corresponding areas in ground truth. Initial learning rate is 10^-4, and it decays to 10^-5 after 30 epochs. Entire training process proceeded for 60 epoches. This setting is defined as our Baseline Approach.
 
 ## Experiments
 
@@ -85,7 +85,7 @@ Loss value during training process of baseline model:
 Qualitative result of our baseline model can be found in our [demo video](https://youtu.be/XTlWN0xPwQE).
 The quantitative evaluation we use is average peak signal-to-noise ratio ([PSNR](https://en.wikipedia.org/wiki/Peak_signal-to-noise_ratio)), average structural similarity ([SSIM](https://en.wikipedia.org/wiki/Structural_similarity)), and mean average brightness difference ([MABD[3]](#reference)). The former two, PSNR and SSIM, are spatial evaluations. They measure to what extent frames in the output are similar to the those in ground truth. The last one, MABD, is defined as: 
 <div align="center"><img src="figure/MABDEqn.gif"/></div>
-M,N are height and width of frames, br^{k}(i, j) is the [brightness](https://en.wikipedia.org/wiki/Relative_luminance) of pixel (i,j) at frame k, with being in the range from 1 to 200. This term measures differences between each consecutive frames. It can be viewed as a general level of derivatives of brightness values w.r.t. time on each pixel location. Because one video can have a MABD vector of length 199, we calculate the mean square error (MSE) between the output's MABD vector and ground truth's MABD vector. This should serve as a measurement on temporal stability of restored videos. PSNR and SSIM are the bigger the better, meaning more similarities between reconstruction and ground truth, while MSE(MABD) is the smaller the better, meaning more stable over time (i.e. less likely to flicker).
+M,N are height and width of frames, br^{k}(i, j) is the  [brightness](https://en.wikipedia.org/wiki/Relative_luminance) of pixel (i,j) at frame k, with being in the range from 1 to 200. This term measures differences between each consecutive frames. It can be viewed as a general level of derivatives of brightness values w.r.t. time on each pixel location. Because one video can have a MABD vector of length 199, we calculate the mean square error (MSE) between the output's MABD vector and ground truth's MABD vector. This should serve as a measurement on temporal stability of restored videos. PSNR and SSIM are the bigger the better, meaning more similarities between reconstruction and ground truth, while MSE(MABD) is the smaller the better, meaning more stable over time (i.e. less likely to flicker).
 
 Quantitative result of the baseline model:
 
@@ -199,10 +199,12 @@ We picked ResNet as our best model to compete against three state-of-the-art dar
 ## Conclusion
 Modifications show improvements. (GAN, ResNet, loss functions, batch update, etc.)
 Comparable and better than the state-of-the-art on our dataset.
-**Limitations. ** 
+
+**Limitations.** 
 Downsampled dataset.
 Not thoroughly searched for all possible combinations. (Time and Computation resource limits)
-**Future Work. ** 
+
+**Future Work.** 
 
 
 ## Usage
