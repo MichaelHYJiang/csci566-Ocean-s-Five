@@ -57,7 +57,7 @@ In addition to the Baseline model, we also use Histogram Equalization, add GAN, 
 
 ### Approach1 Add Batch Size
 
-Baseline updates loss for one sample in an epoch (SGD). We modify network and train process to make the code suitable for mini-batch gradient descent. Due to the memory limitation, we only test batch size <= 23.
+Baseline updates loss for one sample in an epoch (SGD). We modify network and train process to make the code suitable for mini-batch gradient descent. Due to the memory limitation, we only test batch size <= 23. Mini-batch gradient descent converges to a smaller noise ball compared to SGD.
 
 **Results** 
 
