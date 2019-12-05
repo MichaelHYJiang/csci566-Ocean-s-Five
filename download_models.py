@@ -37,8 +37,8 @@ if not os.path.isdir(CHECKPOINT_DIR):
     os.makedirs(CHECKPOINT_DIR)
 
 print('Dowloading Trained Model (63Mb)...')
-download_file_from_google_drive('1yXeEh2zbP4NQ9ogOO-r7GO9pdrV7yXzr', CHECKPOINT_DIR + '/checkpoint')
-download_file_from_google_drive('1yl3mMkvXBZf19XoM38lmDyUuJkYt-Rgb', CHECKPOINT_DIR + '/model.ckpt.index')
-download_file_from_google_drive('1YQP0zzbkGH-EaqU3eMIX6MpWB7dD3l6l', CHECKPOINT_DIR + '/model.ckpt.meta')
-download_file_from_google_drive('1YbiBNm2iIRuSm4Jb3xSVJ5UrJspIE9cw', CHECKPOINT_DIR + '/model.ckpt.data-00000-of-00001')
+download_file_from_google_drive('1mvgGwj-ShSv1Y0pjPDXsjDqZLRYeY7g5', CHECKPOINT_DIR + '/checkpoint')
+download_file_from_google_drive('1e8wETHJy2NqFz3uXUaKZkoMTQ6fZdkTX', CHECKPOINT_DIR + '/model.ckpt.index')
+download_file_from_google_drive('1J7gw9-1XCFceITeNQsg5FMysfM-YSk5I', CHECKPOINT_DIR + '/model.ckpt.meta')
+download_file_from_google_drive('1WwzMPHulDxAyFYqCmyXeVWrWfPqE2Xc-', CHECKPOINT_DIR + '/model.ckpt.data-00000-of-00001')
 print('Done.')
