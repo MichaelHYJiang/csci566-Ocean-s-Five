@@ -274,11 +274,11 @@ A summary of answers during question session on presentation of Dec. 3rd.
 
 2. Was the videos filmed during night or under the daylight?
 
-	#### Videos of the original dataset were all filmed at sufficiently illuminated places, because it needs to generate bright videos as ground truths. However, both paper [[3]](#references) and our project tested on real world night videos and achieved visually pleasing results. (See [demo video](https://youtu.be/XTlWN0xPwQE))
+	#### Ans: Videos of the original dataset were all filmed at sufficiently illuminated places, because it needs to generate bright videos as ground truths. However, both paper [[3]](#references) and our project tested on real world night videos and achieved visually pleasing results. (See [demo video](https://youtu.be/XTlWN0xPwQE))
 
 3. How was your result compared to state-of-the-art methods?
 
-	#### We compared our best solution, a ResNet model, with a CVPR' 18 [[1]](#references) method, a BMVC' 18 [[2]](#references) method, and an ICCV' 19 [[3]](#references) method. The CVPR' 18 is a image enhancement method that has way less stability along time axis than ours. The BMVC' 18 one trained slower, requires larger computational resources. It introduced artifacts into its results. The ICCV' 19 one was trained on the original high definition dataset, and introduces more blur than our updated models. Quantitative results of these comparisons can be found in [Benchmarking](#benchmarking) of this report. Qualitative comparisons are in our [demo video](https://youtu.be/XTlWN0xPwQE).
+	#### Ans: We compared our best solution, a ResNet model, with a CVPR' 18 [[1]](#references) method, a BMVC' 18 [[2]](#references) method, and an ICCV' 19 [[3]](#references) method. The CVPR' 18 is a image enhancement method that has way less stability along time axis than ours. The BMVC' 18 one trained slower, requires larger computational resources. It introduced artifacts into its results. The ICCV' 19 one was trained on the original high definition dataset, and introduces more blur than our updated models. Quantitative results of these comparisons can be found in [Benchmarking](#benchmarking) of this report. Qualitative comparisons are in our [demo video](https://youtu.be/XTlWN0xPwQE).
 
 
 
