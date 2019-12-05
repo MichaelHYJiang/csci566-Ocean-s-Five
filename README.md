@@ -262,14 +262,15 @@ A summary of answers during question session on presentation of Dec. 3rd.
 
 1. How did you acquire your dataset?
 
-#### Ans: Original dataset was from paper [[3]](#references). In that paper a novel optical system is put forward. It consists of a beam splitter, a neutral density filter, a signal generator and 2 cameras. It can record pairs of bright and dark videos of the exact same scene at the same time. We described a little about it in our report section [Dataset](#dataset). More details can be found in the original paper. The dataset was originally designed for the dark video enhancement of tasks. In our project, we downsampled it by a factor of 3 on both height and width of frames.
+	#### Ans: Original dataset was from paper [[3]](#references). In that paper a novel optical system is put forward. It consists of a beam splitter, a neutral density filter, a signal generator and 2 cameras. It can record pairs of bright and dark videos of the exact same scene at the same time. We described a little about it in our report section [Dataset](#dataset). More details can be found in the original paper. The dataset was originally designed for the dark video enhancement of tasks. In our project, we downsampled it by a factor of 3 on both height and width of frames.
 
 2. Was the videos filmed during night or under the daylight?
 
-#### Videos of the original dataset were all filmed at sufficiently illuminated places, because it needs to generate bright videos as ground truths. However, both paper [[3]](#references) and our project tested on real world night videos and achieved visually pleasing results. (See [demo video](https://youtu.be/XTlWN0xPwQE))
+	#### Videos of the original dataset were all filmed at sufficiently illuminated places, because it needs to generate bright videos as ground truths. However, both paper [[3]](#references) and our project tested on real world night videos and achieved visually pleasing results. (See [demo video](https://youtu.be/XTlWN0xPwQE))
 
 3. How was your result compared to state-of-the-art methods?
-#### We compared our best solution, a ResNet model, with a CVPR' 18 [[1]](#references) method, a BMVC' 18 [[2]](#references) method, and an ICCV' 19 [[3]](#references) method. The CVPR' 18 is a image enhancement method that has way less stability along time axis than ours. The BMVC' 18 one trained slower, requires larger computational resources. It introduced artifacts into its results. The ICCV' 19 one was trained on the original high definition dataset, and introduces more blur than our updated models. Quantitative results of these comparisons can be found in [Benchmarking](#benchmarking) of this report. Qualitative comparisons are in our [demo video](https://youtu.be/XTlWN0xPwQE).
+
+	#### We compared our best solution, a ResNet model, with a CVPR' 18 [[1]](#references) method, a BMVC' 18 [[2]](#references) method, and an ICCV' 19 [[3]](#references) method. The CVPR' 18 is a image enhancement method that has way less stability along time axis than ours. The BMVC' 18 one trained slower, requires larger computational resources. It introduced artifacts into its results. The ICCV' 19 one was trained on the original high definition dataset, and introduces more blur than our updated models. Quantitative results of these comparisons can be found in [Benchmarking](#benchmarking) of this report. Qualitative comparisons are in our [demo video](https://youtu.be/XTlWN0xPwQE).
 
 
 
