@@ -2,9 +2,9 @@
 
 #### USC 2019 Fall CSCI 566 Course Project
 #### Team Name : *Ocean's Five* 
-This project is aimed to directly enhance extreme low light videos captured by ordinary cameras. This project is implemented by [Haiyang Jiang](https://github.com/MichaelHYJiang), [Boyuan Wang](https://github.com/wangby511), [Feng Chi](https://github.com/chifeng1113), [Yue Qin](https://github.com/qiny9492) and [Hongfa Huang](https://github.com/gordonxwong).
+This project aims to directly enhance extreme low light videos captured by ordinary cameras. This TensorFlow implementation is written by [Haiyang Jiang](https://github.com/MichaelHYJiang), [Boyuan Wang](https://github.com/wangby511), [Feng Chi](https://github.com/chifeng1113), [Yue Qin](https://github.com/qiny9492) and [Hongfa Huang](https://github.com/gordonxwong).
 
-[Demo Video](https://youtu.be/XTlWN0xPwQE)
+### [Demo Video](https://youtu.be/XTlWN0xPwQE)
 
    * [Motivation](#motivation)
    * [Problem Descriptions and Dataset](#problem-descriptions-and-dataset)
@@ -19,9 +19,9 @@ This project is aimed to directly enhance extreme low light videos captured by o
    * [Author](#author)
 
 ## Motivation
-The extreme dark video enhancements could be applied to many cases nowadays. Some documentaries shold be shooted without the artificial light in order not to interfere with the environment ,disturbing the animals, for examples. In addition, some video evidences presented to the court might be caught by a CCTV in a dark enviroment. Moreover, every one holding a smart phone has easy access to take videos. Our extreme dark video enhancements can help to reproduce the dark documentary videos in a high-quality visible version, to make the video evidences bright and clear without missing the important details ,and to let video shooting ametaurs not worry too much about controlling the light in their shooting environments.
+The extreme dark video enhancements could be applied to many cases nowadays. Some documentaries should be shooted without any artificial light in order not to interfere with the environment, disturbing the animals, for example. In addition, some video evidences presented to the court might be recorded by a CCTV in a dark enviroment. Moreover, every one holding a smart phone has easy access to taking videos. Our extreme dark video enhancements can help to reproduce the dark documentary videos in a high-quality visible version, to make the video evidences bright and clear without missing the important details, and to let video shooting ametaurs not worry too much about controlling the light in their shooting environments.
 
-However,current solutions to such problem mainly involve near-infrared (NIR) LED or diodes. They help to gain better vision in low-light environments but also introduce drawbacks compared to natural light cameras. Besides, the inevitable energy consumption and heat generation with the presence of extra light sources can increase operation and maintenance costs of a system. More significantly, visible color and texture information could suffer from extensive loss by using such system. Thus, we want to train a dark vedio enhancement network which can dramatically save the maintenance cost and ensure our vedio qualities.
+However, current solutions to such problem mainly involve near-infrared (NIR) LED or diodes. They help to gain better vision in low-light environments but also introduce drawbacks compared to natural light cameras. Besides, the inevitable energy consumption and heat generation with the presence of extra light sources can increase operation and maintenance costs of a system. More significantly, visible color and texture information could suffer from extensive loss by using such systems. Thus, we want to train a dark video enhancement network which can dramatically save the maintenance cost and ensure our vedio qualities.
 
 
 ![Definition](figure/definition.png)
@@ -29,8 +29,7 @@ However,current solutions to such problem mainly involve near-infrared (NIR) LED
 ## Problem Descriptions and Dataset
 Our dataset includes 179 video pairs of street views with moving vehicles and pedestrians under different conditions. Each video pair is of 200 frames taken by a beam splitter. It feeds light into two cameras concurrently and one of them is equipped with a neutral density filter. In this way, we obtain perfect match videos with just light illumination differences. The input format is raw sensor data with Bayer filters to ensure sufficient information against noise level under low light environments. The input, dark videos are chronologically organized raw images. The output, bright videos are in sRGB space, encoded in mp4 format for the convenience of visualizing and post-processing.
 
-A subset of key frames are shown in following figure. Videos in our dataset are down-sampled with a factor of 3 on width and height (i.e. 1/9 of original size), in order to save training and testing time. Sizes of down-sampled
-9 frames are around 340 × 620 pixels. All raw data have been packed and stored in numpy arrays for fast read-in and convenience of processing.
+A subset of key frames are shown in following figure. Videos in our dataset are down-sampled with a factor of 3 on width and height (i.e. 1/9 of original size), in order to save training and testing time. Sizes of down-sampled frames are around 340 × 620 pixels. All raw data have been packed and stored in numpy arrays for fast read-in and convenience of processing.
 
 ![Data Example](figure/origin_dataset.png)
 
