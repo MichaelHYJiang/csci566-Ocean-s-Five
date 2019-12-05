@@ -1,23 +1,147 @@
 # Extreme Dark Video Enhancement
-#### USC 2019 Fall CSCI 566 *Ocean's Five* Course Project
 
+#### USC 2019 Fall CSCI 566 Course Project
+#### Team Name : *Ocean's Five* 
+This project is aim to directly enhance extreme low light videos captured by ordinary cameras. This project is implemented by [Haiyang Jiang](https://github.com/MichaelHYJiang), [Boyuan Wang](https://github.com/wangby511), [Feng Chi](https://github.com/chifeng1113), [Yue Qin](https://github.com/qiny9492) and [Hongfa Huang](https://github.com/gordonxwong).
 
-## Baseline Version
+## Motivations
+Current solutions to such problem mainly involve near-infrared (NIR) LED or diodes. They help to gain better vision in low-light environments but also introduce drawbacks compared to natural light cameras. Inevitably, additional energy consumption and heat generation with the presence of extra light sources can increase operation and maintenance costs of a system. More significantly, visible color and texture information could suffer from extensive loss by using such system.
 
-### Download dataset from Google cloud first.
-### Put it in *0_data* directory and unzip it.
+<p align="center">
+    <img src="figure/definition.png" height="72"/>,
+</p>
 
-### Generate file lists
+## Problem Descriptions and Dataset
+Our dataset includes 179 video pairs of street views with moving vehicles and pedestrians under different conditions. Each video pair is of 200 frames taken by a beam splitter. It feeds light into two cameras concurrently and one of them is equipped with a neutral density filter. In this way, we obtain perfect match videos with just light illumination differences. The input format is raw sensor data with Bayer filters to ensure sufficient information against noise level under low light environments. The input, dark videos are chronologically organized raw images. The output, bright videos are in sRGB space, encoded in mp4 format for the convenience of visualizing and post-processing.
+
+A subset of key frames are shown in following figure. Videos in our dataset are down-sampled with a factor of 3 on width and height (i.e. 1/9 of original size), in order to save training and testing time. Sizes of down-sampled
+9 frames are around 340 × 620 pixels. All raw data have been packed and stored in numpy arrays for fast read-in and convenience of processing.
+
+<p align="center">
+    <img src="figure/origin_dataset.png" height="72"/>,
+</p>
+
+We also provide a comparison between input frames and their corresponding ground truth frames in Figure 4, to illustrate pixel-level alignment between training input and ground truth. It can be seen from the figure that there are challenges of low contrast, high noise level, and unnatural color mapping in our task. Alignment between frames in input videos (left) and ground truth videos (right). Frames of input videos are linearly scaled to provide more details of objects and noise level.
+
+<p align="center">
+    <img src="figure/origin_dataset2.png" height="72"/>,
+</p>
+
+| | Number of video pairs | Number of Frames |
+| --- | --- | --- |
+| Training | 125 | 200 |
+| Validation | 27 | 200 |
+| Test | 27 | 200 |
+
+## Approaches
+
+We use U-Net model as the basic network in our project. The U-Net is originally used for segmentation of images in medical and biomedical fields by using convolutional networks with upsampling functions. For the type of our input data is video, we modify the dimensions of input to the network from 2D to 3D. Hence, we use a 3D-Convolution and 2D-Pooling U-Net and we also control the depth of U-Net between two and four, typically in three. The following figure illustrates the details about our network structure.
+
+<p align="center">
+    <img src="figure/3D-U-Net.png" height="72"/>,
+</p>
+
+During the training approach, we cut the video data into pieces with cropping and flipping action before feeding it into the network. For example, we select piece of 16 × 256 × 256. In this piece, 16 represents number of frames and 256 represents both height and width. After the training step, we saved the trained model into a file. During the test phase, we load the model again and use it to transfer the new video data to a new generated video by cutting it into pieces just like the size in the training approach. Then we send them into the network and concatenate the output pieces together with a bit overlapping.
+
+Currently, we are using Adam optimizer and L1 loss between generated videos and ground truth to train the model. This is defined as our Baseline Approach.
+
+In addition to the Baseline model, we also use Histogram Equalization, add GAN, ResNet as well as function of multi losses and update hyper parameters to optimize the current algorithm as well as improving experiment different metrics.
+
+### Approach1 Add Batch Size
+
+**Results** 
+
+| | Final Loss | Final Validation Loss | PSNR | SSIM | MSE (MABD) Unit: 10^-3 |
+| --- | --- | --- | --- | --- | --- |
+| 1 (baseline) | 0.039408 | 0.044127 | 24.753451|0.788749|2.945|
+| 10 | 0.248571 | 0.216568 | 12.412363 | 0.425483 | 8.007|
+
+**Conclusions** 
+* Use batch size > 1 can speed up the training process. (batch size = 10 is 2 times faster than baseline)
+* When batch size is large, it uses more memory to train. In this case, I choose 4 CPU 15GB memory for the virtual machine, it cannot handle batch size > 20.
+* Batch size causes the loss, PSNR, SSIM etc. to converge slower than baseline, if we use the same epoch.
+
+### Approach2 Add Multi Loss
+
+1. **L1-Loss**. This loss is used in baseline. It computes average absolute difference for each pixel.
+
+2. **Regional-Loss**. It is the same as L1-Loss but we separate dark and bright regions and set different weights for them two, normally 4:1. Usually we set the threshold as 0.7 to separarte dark and bright regions in (0,1) range type.
+
+3. **Structure-Loss**. The SSIM is a very standard method means structural similarity index with its value in range (-1,1). We use the gap between it and 1 as the structure loss.
+
+4. **VGG-Loss**. We use both the generated image and its corresponding output image to send into pretrained VGG19 network model and get their L1-Loss from convolution layers from 1 to 4 as sum of losses together.
+
+**Results** 
+
+| | Final Loss | Final Validation Loss | PSNR | SSIM | MSE (MABD) Unit: 10^-3 |
+| --- | --- | --- | --- | --- | --- |
+| L1 Loss (baseline) | 0.02962 | 0.03367 | 27.26798 | 0.84049 | 0.18188 |
+| Structure Loss | 0.18124 | 0.20149 | 26.70764 | 0.85367↑ | 1.5242 |
+| Region Loss | 0.15896 | 0.17681 |27.23463 | 0.84026 | 0.48029 |
+|VGG Loss (Add vgg19) | 139.36647 | 150.83625 | 27.02222 | 0.83217 | 0.1627↓|
+|Multi Loss1 (Str Reg VGG) |1.75286 |1.91280 | 27.22877 | 0.84750 | 0.37438|
+|Multi Loss2 (L1 Str Reg) | 0.35868 | 0.40669 | 27.06469 | 0.852218↑ | 2.392 | 
+
+**Conclusions** 
+* Compared to L1-Loss as baseline, using structure loss may help improve SSIM(structural similarity index), which means the better relationship of one pixel to its neighbors.
+* Using higher conv layer outputs difference of VGG network as loss does not help improve the result.
+* Using the combination loss of L1 loss, Regional loss and Structure loss for training can improve both MABD and SSIM.
+
+### Approach3 ResNet
+
+Deep Neural Networks usually face the degradation problem. In this approach we add a residual to the previous value to each block of layers rather than produce an entirely new value. It is easy to represent the identity function. We replace our convolution blocks in Unet with residual blocks and add 1x1x1 convolution projection on input to match dimension.
+<p align="center">
+    <img src="figure/resnet.png" height="72"/>,
+</p>
+
+**Results** 
+
+||Final Loss | Final Validation Loss | PSNR | SSIM | MSE (MABD) Unit: 10^-3|
+| --- | --- | --- | --- | --- | --- |
+|Baseline | 0.0292539 | 0.03194653 | 27.203414 | 0.8399437 | 0.727619 |
+|ResNet | 0.02898007 | 0.03173088 | 27.4375552 | 0.841417162 | 0.18700 |
+
+<p align="center">
+    <img src="figure/resnet_result.png" height="72"/>,
+</p>
+
+### Approach4 GAN
+
+<p align="center">
+    <img src="figure/gan.png" height="72"/>,
+</p>
+
+**Results** 
+
+||Final Loss | Final Validation Loss | PSNR | SSIM | MSE (MABD) Unit: 10^-3 |
+| --- | --- | --- | --- | --- | --- |
+|Without GAN | 0.02925 | 0.03195 | 27.20341 | 0.83994 | 0.72762 |
+|With GAN | 0.02907 | 0.03209 | 27.38365 | 0.84086 | 0.14062 | 
+
+## Prerequisites
+
+- [Python 2.7](https://www.python.org/download/releases/2.7/)
+- [Tensorflow 1.1.14](https://www.tensorflow.org/versions/r1.14/api_docs/python/tf)
+- [NumPy](http://www.numpy.org/)
+- [scikit-video](http://www.scikit-video.org/stable/io.html)
+- [cv2](https://pypi.org/project/opencv-python/)
+
+## Usage
+
+Download dataset from Google Cloud first.
+Put it in *0_data* directory and unzip it.
+
+#### Generate file lists
 ```Shell
 python generate_file_list.py
 ```
 
-### Config parameters and then run training
+#### Training
 ```Shell
 python train.py
 ```
 
-### After training, run test command
+#### Testing
 ```Shell
 python test.py [test_case]
 ```
@@ -33,30 +157,14 @@ test_case can be:
 
 All cases save mp4 output videos, while case 2 saves extra npy results.
 
-Quantative measurements on current experiments:
+## References
+* [Learning to see in the dark](https://arxiv.org/pdf/1805.01934.pdf). Chen Chen, Qifeng Chen, Jia Xu and Vladlen Koltun. The IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2018.
+* [MBLLEN: low-light image/video enhancement using cnns](http://bmvc2018.org/contents/papers/0700.pdf). Feifan Lv, Feng Lu, Jianhua Wu, and Chongsoon Lim. In British Machine Vision Conference 2018, BMVC 2018, Northumbria University, Newcastle, UK, September 3-6, 2018, page 220. BMVA Press, 2018.
 
-|   Experiment Name  | Final Loss | Final Validation Loss |        PSNR        |        SSIM        |        MSE(MABD)       |                 Learning Rate                | Group Number |    Frame Frequence   | Network Depth |                  Adjustment                 | People |
-|:------------------:|:----------:|:---------------------:|:------------------:|:------------------:|:----------------------:|:--------------------------------------------:|:------------:|:--------------------:|:-------------:|:-------------------------------------------:|:------:|
-|      Baseline      | 0.02925395 |       0.03194653      |  27.20341440836589 | 0.8399437169233958 |  0.0007276190425069668 |      0-30epoch: 1e-4<br>31-60epoch: 1e-5     |      12      |           4          |       3       |                                             |   HJ   |
-| Baseline Finetuned | 0.02811074 |       0.03246053      | 27.491393449571405 | 0.8447265682397065 | 0.00026039852772696717 | same as above<br>61-75: 1e-5<br>76-100: 1e-4 |      12      | 0-75: 4<br>76-100: 1 |       3       |                                             |   HJ   |
-|  Hist Layer in2he  | 0.04175019 |       0.05246153      | 22.929300082171405 | 0.7788759288964449 |  0.0008090686585943601 |      0-30epoch: 1e-4<br>31-60epoch: 1e-5     |      12      |           4          |       3       |                  hist layer                 |   HJ   |
-|  Hist Layer he2he  | 0.02953422 |       0.03511760      | 26.969168140270085 | 0.8392954715976009 | 0.00036061441545966536 |      0-30epoch: 1e-4<br>31-60epoch: 1e-5     |      12      |           4          |       3       |                  hist layer                 |   HJ   |
-|       Depth 2      | 0.03208632 |       0.03496898      |  26.30993395911323 | 0.8239608135488299 | 0.00015883494476721382 |      0-30epoch: 1e-4<br>31-60epoch: 1e-5     |      12      |           4          |       2       |         down-sampling<br>number = 2         |   HJ   |
-|       Depth 4      |            |                       |                    |                    |                        |                                              |              |                      |               |                                             |   HH   |
-| Initial Channel 16 | 0.03212725 |    0.03427819         | 25.845212350068262 | 0.8160701500044927 |0.003347873718650363|      0-30epoch: 1e-4<br>31-60epoch: 1e-5     |      12      |           4          |       3       |                  hist layer                 |   HH   |
-|     FrameFreq2     | 0.02718642 |       0.03153746      |  27.72178942362468 | 0.8486048811011844 | 0.00030751586973910323 |      0-30epoch: 1e-4<br>31-60epoch: 1e-5     |      12      |           2          |       3       |             frame frequency = 2             |   HJ   |
-|       ResNet       | 0.02898007 |       0.03173088      |  27.43755528485333 | 0.8414171627274266 | 0.0001870047494116059  |      0-30epoch: 1e-4<br>31-60epoch: 1e-5     |      12      |           4          |       3       |           conv -> Residual blocks           |   FC   |
-|Depth 2, 4ResBlock  | 0.03008687 |       0.03392101      |  27.194456058078348| 0.841115109125773  | 0.0008039814724284692  |      0-30epoch: 1e-4<br>31-60epoch: 1e-5     |      12      |           4          |       2       |  4 additional Residual blocks on bottleneck |   FC   |
-|  train by L1 Loss  | 0.02962459 |       0.03367069      |  27.26798362731934 | 0.840491048053459  | 0.00018188494183424305 |      0-30epoch: 1e-4<br>31-50epoch: 1e-5     |      10      |                      |       3       |                                             |   BW   |
-| train by str Loss  | 0.18124115 |       0.20149784      |  26.70764254817257 | 0.853678109910753  | 0.0015242191872764136  |      0-30epoch: 1e-4<br>31-50epoch: 1e-5     |      10      |           4          |       3       |                                             |   BW   |
-|train by region Loss| 0.15896447 |       0.17681161      | 27.234630761323157 | 0.8402597001305335 | 0.00048029046326743263 |      0-30epoch: 1e-4<br>31-50epoch: 1e-5     |      10      |           4          |       3       |                                             |   BW   |
-|  train by VGG Loss |139.36647229|      150.83625793     | 27.022222095065647 | 0.8321757709538495 | 0.00016276957652055672 |      0-30epoch: 1e-4<br>31-50epoch: 1e-5     |      10      |           4          |       3       |                                             |   BW   |
-|     Multi Loss1    | 1.75286838 |       1.91280270      | 27.228771979720506 | 0.8475041495429146 | 0.00037438217094211244 |      0-30epoch: 1e-4<br>31-50epoch: 1e-5     |      10      |           4          |       3       |                                             |   BW   |
-|     Multi Loss2    | 0.35868726 |       0.40669683      | 27.064698537190754 | 0.8522180590364669 | 0.0023925343577309807  |      0-30epoch: 1e-4<br>31-50epoch: 1e-5     |      10      |           4          |       3       |                                             |   BW   |
-|    Batch size = 25 | 0.04271893 |       0.04436313      | 24.330430913854528 | 0.7760647652325808 | 0.004101232390990272   |      0-1epoch: 1e-4                          |      5       |           4          |       3       |  add batch size                             |   YQ   |
-|    Batch size = 25 | 0.03168377 |       0.03497876      | 26.24811760937726  | 0.8290318074049776 | 0.0003979200166002153  |      0-30epoch: 1e-4                         |      5       |           4          |       3       |  epoch = 30                                 |   YQ   |
-|         GAN        | 0.02907291 |       0.03209123      | 27.383646908512816 | 0.8408598800500232 | 0.00014062573447008142 |      0-30epoch: 1e-4<br>31-60epoch: 1e-5     |      12      |           4          |       3       | 4 conv block<br>3 FC layer<br>discriminator |   HJ   |
-
-### Detailed baseline results: 
-https://drive.google.com/file/d/1DLVLR_MRh65gQV7GYVfXjNUma0v7J0PI/view?usp=sharing
-
+## Author
+**Ocean's Five**
+* [Haiyang Jiang](https://github.com/MichaelHYJiang), haiyangj@usc.edu
+* [Boyuan Wang](https://github.com/wangby511), boyuanwa@usc.edu
+* [Feng Chi](https://github.com/chifeng1113), chi721@usc.edu
+* [Yue Qin](https://github.com/qiny9492), qiny@usc.edu
+* [Hongfa Huang](https://github.com/gordonxwong),hongfahu@usc.edu
