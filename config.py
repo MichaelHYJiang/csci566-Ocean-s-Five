@@ -3,7 +3,6 @@
 # ----------------------------------------------------------------
 # Configurations for Training and Testing Process
 # Written by Haiyang Jiang
-# Mar 1st 2019
 # ----------------------------------------------------------------
 
 # file lists ================================================================
@@ -32,7 +31,7 @@ CROP_WIDTH = 128
 
 SAVE_FREQ = 5
 MAX_EPOCH = 30
-BATCH_SIZE = 1
+BATCH_SIZE = 10
 
 FRAME_FREQ = 4
 GROUP_NUM = 5

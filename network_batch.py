@@ -2,8 +2,8 @@
 
 # ----------------------------------------------------------------
 # 3D-Convolution and 2D-Pooling UNet
-# Written by Haiyang Jiang
-# Mar 1st 2019
+# Author: Yue Qin
+# Add batch size to baseline network
 # ----------------------------------------------------------------
 
 

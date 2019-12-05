@@ -1,23 +1,33 @@
 # Learning-to-See-Moving-Objects-in-the-Dark
 
-## Demo Video
-https://youtu.be/GZu30-a8N0M
+## Modified from Master Branch
+Files change: network.py, train_batch.py
 
-## Demo Version
+## Usage
+Download dataset from Google Cloud first. Put it in 0_data directory and unzip it.
 
-### Download trained model
+### Generate file lists
 ```Shell
-python download_model.py
+python generate_file_list.py
 ```
 
-### Download example data
+### Training
 ```Shell
-python download_dataset.py
+python train_batch.py
 ```
 
-### Run demo
+### Testing
 ```Shell
-python test.py
+python test_batch.py [test_case]
 ```
+test_case can be:
 
-### More details and complete dataset will be updated soon.
+0 test on training set
+
+1 test on validation set
+
+2 test on test set(save npy results)
+
+3 test on customized set
+
+All cases save mp4 output videos, while case 2 saves extra npy results.

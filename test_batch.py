@@ -2,8 +2,7 @@
 
 # ----------------------------------------------------------------
 # 3D-Conv-2D-Pool-UNet Testing Indoor Cases
-# Written by Haiyang Jiang
-# Mar 20th 2019
+# Modified by Yue Qin
 # ----------------------------------------------------------------
 
 import os, time
@@ -15,7 +14,7 @@ import numpy as np
 from skvideo.io import vwrite, vread
 
 
-from network import network
+from network_batch import network
 from config import *
 
 

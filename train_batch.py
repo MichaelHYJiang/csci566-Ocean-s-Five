@@ -15,7 +15,7 @@ import tensorflow as tf
 import tensorflow.contrib.slim as slim
 from skvideo.io import vwrite
 
-from network import network
+from network_batch import network
 from config import *
 
 # get train IDs
