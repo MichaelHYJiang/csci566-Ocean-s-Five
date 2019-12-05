@@ -66,6 +66,8 @@ def demosaic(in_vid, converter=cv2.COLOR_BayerGB2BGR):
 def crop(raw, gt_raw, start_frame=0):
     # inputs must be in a form of [batch_num, frame_num, height, width, channel_num]
     tt = start_frame
+    W = raw.shape[3]
+    H = raw.shape[2]
     xx = np.random.randint(0, W - CROP_WIDTH)
     yy = np.random.randint(0, H - CROP_HEIGHT)
 
@@ -142,7 +144,7 @@ def main():
     gt_images = [None] * len(train_ids)
     input_images = [None] * len(train_ids)
 
-    g_loss = np.zeros((len(train_ids), 1))
+
 
     lastepoch = 0
     if not os.path.isdir(RESULT_DIR):
@@ -158,11 +160,7 @@ def main():
     np.random.seed(ord('c') + 137)
     count = 0
 
-    # compute the maximum iterations and iterations per epoch
-    # if len(train_ids) = 125, BATCH_SIZE = 25, iters_per_epoch = 5
-    iters_per_epoch = int(max(len(train_ids)/BATCH_SIZE, 1))
-#     max_iters = int(iters_per_epoch * MAX_EPOCH)
-    #
+
     for epoch in range(lastepoch, MAX_EPOCH + 1):
         if epoch % SAVE_FREQ == 0:
             save_results = True
@@ -174,29 +172,33 @@ def main():
         if epoch > DECAY_EPOCH:
             learning_rate = DECAY_LR
 
-        # compute the starting iteration and ending iteration for current epoch
-#         iter_start = epoch * iters_per_epoch
-#         iter_end = (epoch + 1) * iters_per_epoch
 
-        for iter in range(iters_per_epoch):
-            N = BATCH_SIZE
-            all_order = np.random.permutation(N) + iter * BATCH_SIZE
-            last_group = (N // GROUP_NUM) * GROUP_NUM + iter * BATCH_SIZE
-            split_order = np.split(all_order[:last_group], (N // GROUP_NUM))
-            split_order.append(all_order[last_group:])
+        N = len(train_ids)
+        all_order = np.random.permutation(N)
+        last_group = (N // GROUP_NUM) * GROUP_NUM
+        split_order = np.split(all_order[:last_group], (N // GROUP_NUM))
+        split_order.append(all_order[last_group:])
+        for order in split_order:
+            if len(order) == 0:
+                continue
+            gt_images = [None] * len(train_ids)
+            input_images = [None] * len(train_ids)
+            order_frame = [(one, y) for y in [t for t in np.random.permutation(ALL_FRAME - CROP_FRAME) if t % FRAME_FREQ == 0] for one in order]
 
-#         N = len(train_ids)
-#         all_order = np.random.permutation(N)
-#         last_group = (N // GROUP_NUM) * GROUP_NUM
-#         split_order = np.split(all_order[:last_group], (N // GROUP_NUM))
-#         split_order.append(all_order[last_group:])
-            for order in split_order:
-                gt_images = [None] * len(train_ids)
-                input_images = [None] * len(train_ids)
-                order_frame = [(one, y) for y in [t for t in np.random.permutation(ALL_FRAME - CROP_FRAME) if t % FRAME_FREQ == 0] for one in order]
+            index = np.random.permutation(len(order_frame))
+            # added
+            iters_per_epoch = int(len(index) / BATCH_SIZE)
+            g_loss = np.zeros((iters_per_epoch, 1))
 
-                index = np.random.permutation(len(order_frame))
-                for idx in index:
+            for iter in range(iters_per_epoch):
+                input_patch_per_batch = []
+                gt_patch_per_batch = []
+                st = time.time()
+                for i in range(BATCH_SIZE):
+                    idx = index[i + iter * BATCH_SIZE]
+            # added end
+            # for idx in index:
+
                     ind, start_frame = order_frame[idx]
                     start_frame += np.random.randint(FRAME_FREQ)
                     # get the path from image id
@@ -205,7 +207,7 @@ def main():
 
                     gt_path = gt_files[ind]
 
-                    st = time.time()
+
                     cnt += 1
 
                     if input_images[ind] is None:
@@ -227,28 +229,36 @@ def main():
 
                     input_patch = np.minimum(input_patch, 1.0)
 
-                    _, G_current, output = sess.run([G_opt, G_loss, out_image], feed_dict={in_image: input_patch, gt_image: gt_patch, lr: learning_rate})
-                    output = np.minimum(np.maximum(output, 0), 1)
-                    g_loss[ind] = G_current
+                    input_patch_per_batch.append(input_patch)
+                    gt_patch_per_batch.append(gt_patch)
+
+                # after each batch, we calculate the loss
+                # concatenate patches
+
+                input_batch = np.vstack(tuple(input_patch_per_batch))
+                gt_batch = np.vstack(tuple(gt_patch_per_batch))
+
+                _, G_current, output = sess.run([G_opt, G_loss, out_image], feed_dict={in_image: input_batch, gt_image: gt_batch, lr: learning_rate})
+                output = np.minimum(np.maximum(output, 0), 1)
+                # g_loss[ind] = G_current
+                g_loss[iter] = G_current
+
+
+                # save loss for each batch iteration
+                summary = sess.run(summary_op, feed_dict={v_loss:G_current})
+                writer.add_summary(summary, count)
+                count += 1
+
+                if save_results and start_frame in SAVE_FRAMES:
+                    temp = np.concatenate((gt_batch[0, :, ::-1, :, :], output[0, :, ::-1, :, :]), axis=2)
+                    try:
+                        vwrite((RESULT_DIR + '%04d/%s_train.avi' % (epoch, train_id)), (temp * 255).astype('uint8'))
+                    except OSError as e:
+                        print('\t', e, 'Skip saving.')
 
 
 
-
-                    # save loss
-                    summary = sess.run(summary_op, feed_dict={v_loss:G_current})
-                    writer.add_summary(summary, count)
-                    count += 1
-
-                    if save_results and start_frame in SAVE_FRAMES:
-                        temp = np.concatenate((gt_patch[0, :, ::-1, :, :], output[0, :, ::-1, :, :]), axis=2)
-                        try:
-                            vwrite((RESULT_DIR + '%04d/%s_train.avi' % (epoch, train_id)), (temp * 255).astype('uint8'))
-                        except OSError as e:
-                            print('\t', e, 'Skip saving.')
-
-
-
-                    print("%d %d Loss=%.8f Time=%.3f" % (epoch, cnt, np.mean(g_loss[np.where(g_loss)]), time.time() - st)), train_id
+                print("%d %d %d Loss=%.8f Time=%.3f" % (epoch, iter, cnt, np.mean(g_loss[np.where(g_loss)]), time.time() - st)), train_id
 
         # validation after each epoch
         v_start = time.time()

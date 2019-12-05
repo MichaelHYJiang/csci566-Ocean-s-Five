@@ -31,15 +31,15 @@ CROP_HEIGHT = 128
 CROP_WIDTH = 128
 
 SAVE_FREQ = 5
-MAX_EPOCH = 20
-BATCH_SIZE = 25
+MAX_EPOCH = 30
+BATCH_SIZE = 1
 
 FRAME_FREQ = 4
 GROUP_NUM = 5
 
 INIT_LR = 1e-4
 DECAY_LR = 1e-5
-DECAY_EPOCH = 15
+DECAY_EPOCH = 30
 
 # test.py ================================================================
 TEST_CROP_FRAME = 32
