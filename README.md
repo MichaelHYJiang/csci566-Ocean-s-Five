@@ -19,10 +19,10 @@ This project aims to directly enhance extreme low light videos captured by ordin
       * [Approach 2: Multiple Loss Functions](#approach-2-multiple-loss-functions)
       * [Approach 3: Residual Blocks](#approach-3-residual-block)
       * [Approach 4: GAN](#approach-4-gan)
-   * [Qualitative Result](#qualitative-result)
+      * [Benchmarking](#benchmarking)
    * [Conclusion](#conclusion)
    * [Usage](#usage)
-      * [Dependencies](#dependencies)
+      * [Prerequisites](#prerequisites)
       * [Commands](#commands)
    * [References](#references)
    * [Author Information](#author)
@@ -78,18 +78,32 @@ Videos in our training set had been histogram equalized before being saved as np
 ## Experiments
 
 ### Baseline
+Loss value during training process of baseline model:
 
-In addition to the Baseline model, we also use Histogram Equalization, add GAN, ResNet as well as function of multi losses and update hyper parameters to optimize the current algorithm as well as improving experiment different metrics.
+![Network](figure/baseline.png)
+
+Qualitative result of our baseline model can be found in our [demo video](https://youtu.be/XTlWN0xPwQE).
+The quantitative evaluation we use is average peak signal-to-noise ratio ([PSNR](https://en.wikipedia.org/wiki/Peak_signal-to-noise_ratio)), average structural similarity ([SSIM](https://en.wikipedia.org/wiki/Structural_similarity)), and mean average brightness difference ([MABD[3]](#reference)). The former two, PSNR and SSIM, are spatial evaluations. They measure to what extent frames in the output are similar to the those in ground truth. The last one, MABD, is defined as: 
+<div align="center"><img src="figure/MABDEqn.gif"/></div>
+M,N are height and width of frames, br^{k}(i, j) is the [brightness](https://en.wikipedia.org/wiki/Relative_luminance) of pixel (i,j) at frame k, with being in the range from 1 to 200. This term measures differences between each consecutive frames. It can be viewed as a general level of derivatives of brightness values w.r.t. time on each pixel location. Because one video can have a MABD vector of length 199, we calculate the mean square error (MSE) between the output's MABD vector and ground truth's MABD vector. This should serve as a measurement on temporal stability of restored videos. PSNR and SSIM are the bigger the better, meaning more similarities between reconstruction and ground truth, while MSE(MABD) is the smaller the better, meaning more stable over time (i.e. less likely to flicker).
+
+Quantitative result of the baseline model:
+
+| Model | Final Loss | Final Validation Loss | PSNR | SSIM | MSE (MABD) Level: 10^-3 |
+| --- | --- | --- | --- | --- | --- |
+| Baseline | 0.029254 | 0.031946 | 27.203 | 0.83994 | 0.72762 |
+
+In addition to the Baseline model, we also exprimented several optimization methods, including GAN setting, residual blocks, multiple loss functions and finetuning hyper parameters.
 
 ### Approach 1 Batch Update
 
-Baseline updates loss for one sample in an epoch (SGD). We modify network and train process to make the code suitable for mini-batch gradient descent. Due to the memory limitation, we only test batch size <= 23. Mini-batch gradient descent converges to a smaller noise ball compared to SGD.
+Baseline updates loss for one sample in an iteration (i.e. similar to SGD). We modify network and train process to make the code suitable for mini-batch weight update. Due to the memory limitation, we only test batch size <= 23. Mini-batch gradient descent converges to a smaller noise ball compared to SGD.
 
 **Results** 
 
-| | Final Loss | Final Validation Loss | PSNR | SSIM | MSE (MABD) Unit: 10^-3 |
+|Batch Size | Final Loss | Final Validation Loss | PSNR | SSIM | MSE (MABD) Level: 10^-3 |
 | --- | --- | --- | --- | --- | --- |
-| 1 (baseline) | 0.03941 | 0.04413 | 24.75345|0.78875|2.94543|
+| 1 (baseline) | 0.029254 | 0.031946 | 27.203 | 0.83994 | 0.72762 |
 | 10 | 0.24857 | 0.21656 | 12.41236 | 0.42548 | 8.00733|
 | 23 | 0.25735 | 0.23038 | 11.78491 | 0.36570 | 8.03293|
 
@@ -110,14 +124,16 @@ Baseline updates loss for one sample in an epoch (SGD). We modify network and tr
 
 **Results** 
 
-| | Final Loss | Final Validation Loss | PSNR | SSIM | MSE (MABD) Unit: 10^-3 |
+|Loss | Final Loss | Final Validation Loss | PSNR | SSIM | MSE (MABD) Unit: 10^-3 |
 | --- | --- | --- | --- | --- | --- |
-| L1 Loss (baseline) | 0.02962 | 0.03367 | 27.26798 | 0.84049 | 0.18188 |
+| L1 Loss (baseline) | 0.029254 | 0.031946 | 27.203 | 0.83994 | 0.72762 |
 | Structure Loss | 0.18124 | 0.20149 | 26.70764 | 0.85367↑ | 1.5242 |
-| Region Loss | 0.15896 | 0.17681 |27.23463 | 0.84026 | 0.48029 |
+| Region Loss | 0.15896 | 0.17681 |27.23463↑ | 0.84026↑ | 0.48029↓ |
 |VGG Loss (Add vgg19) | 139.36647 | 150.83625 | 27.02222 | 0.83217 | 0.1627↓|
-|Multi Loss1 (Str Reg VGG) |1.75286 |1.91280 | 27.22877 | 0.84750 | 0.37438|
-|Multi Loss2 (L1 Str Reg) | 0.35868 | 0.40669 | 27.06469 | 0.852218↑ | 2.392 | 
+|Multi Loss1 (Str Reg VGG) |1.75286 |1.91280 | 27.22877↑ | 0.84750↑ | 0.37438↓|
+|Multi Loss2 (L1 Str Reg) | 0.35868 | 0.40669 | 27.06469 | 0.852218↑ | 2.392↓ | 
+
+(Arrows denote advantage over baseline model.)
 
 **Conclusions** 
 * Compared to L1-Loss as baseline, using structure loss may help improve SSIM(structural similarity index), which means the better relationship of one pixel to its neighbors.
@@ -132,25 +148,60 @@ Deep Neural Networks usually face the degradation problem. In this approach we a
 
 **Results** 
 
-||Final Loss | Final Validation Loss | PSNR | SSIM | MSE (MABD) Unit: 10^-3|
+|Setting |Final Loss | Final Validation Loss | PSNR | SSIM | MSE (MABD) Unit: 10^-3|
 | --- | --- | --- | --- | --- | --- |
-|Baseline | 0.0292539 | 0.03194653 | 27.203414 | 0.8399437 | 0.727619 |
-|ResNet | 0.02898007 | 0.03173088 | 27.4375552 | 0.841417162 | 0.18700 |
+|Baseline | 0.029254 | 0.031946 | 27.203 | 0.83994 | 0.72762 |
+|ResNet | 0.028980 | 0.031731 | 27.438↑ | 0.84142↑ | 0.18700↓ |
 
 ![ResNet Training](figure/resnet_result.png)
 
 ### Approach 4 GAN
 
+After playing with a number manually designed loss functions, we decided to move on to letting networks learn a unique loss function on itself, i.e. modifying it to a GAN setting. We maintained 3D U-Net as a generator. We added a discriminator with 4 conv blocks and 3 fully connected layers as shown below.
+
 ![Discriminator](figure/gan.png)
+
+It outputs a likelihood of its inputs' authenticity. Cross entropy loss on discriminator's outputs is used. A 16-frame output video is set as a training input image batch ("fake batch", batch size = 16) with labels being all zero, while its corresponding 16-frame ground truth video is another batch ("real batch", batch size = 16) with labels being all one. Generator and discriminator update their weights separately, with former depending on cross entropy loss of a fake batch, and latter on that of both batches. Zeros and ones are set accordingly, as is the case in homework2 of this course.
 
 **Results** 
 
-||Final Loss | Final Validation Loss | PSNR | SSIM | MSE (MABD) Unit: 10^-3 |
+|Setting |Final Loss | Final Validation Loss | PSNR | SSIM | MSE (MABD) Unit: 10^-3 |
 | --- | --- | --- | --- | --- | --- |
-|Without GAN | 0.02925 | 0.03195 | 27.20341 | 0.83994 | 0.72762 |
-|With GAN | 0.02907 | 0.03209 | 27.38365 | 0.84086 | 0.14062 | 
+|Without GAN (baseline) | 0.029254 | 0.031946 | 27.203 | 0.83994 | 0.72762 |
+|With GAN | 0.029073 | 0.032091 | 27.384↑ | 0.84086↑ | 0.14062↓ | 
 
-## Prerequisites
+GAN setting showed trivial advantage over the baseline case. When we reexamined the discriminator's output, it turned out that the discriminator failed to distinguish fake and real batches at fairly early stage. Finetuning of this GAN model is required, for the capacity and training speed might vary hugely between the generator and discriminator. Due to the time consumption and limit, we didn't have further exploration in this direction.
+
+### Benchmarking
+Multi-Loss1, ResNet and GAN all show better measurements than the baseline model. Among them, ResNet has the most ballanced result: it has PSNR and MABD better than Multi Loss1, and PSNR and SSIM better than GAN result.
+
+|Setting| PSNR | SSIM | MSE (MABD) Unit: 10^-3 |
+| --- | --- | --- | --- |
+|Multi Loss1| 27.22877↑ | 0.84750↑ | 0.37438↓| 
+|ResNet | 27.438↑ | 0.84142↑ | 0.18700↓ |
+|GAN | 27.384↑ | 0.84086↑ | 0.14062↓ | 
+
+We picked ResNet as our best model to compete against three state-of-the-art dark image/video enhancement methods [[1][2][3]](#references).
+
+|Setting| PSNR | SSIM | MSE (MABD) Unit: 10^-3 |
+| --- | --- | --- | --- |
+| Our ResNet | 27.438 | 0.84142 | 0.18700 | 
+|CVPR 2018[[1]](#references) | 27.039 | 0.81556 | 0.96960 |
+|BMVC 2018[[2]](#references) | 24.600 | 0.79418 | 0.18450 |
+|ICCV 2019[[3]](#references) | 22.891 | 0.73099 | 0.22020 |
+
+## Conclusion
+Modifications show improvements. (GAN, ResNet, loss functions, batch update, etc.)
+Comparable and better than the state-of-the-art on our dataset.
+**Limitations. ** 
+Downsampled dataset.
+Not thoroughly searched for all possible combinations. (Time and Computation resource limits)
+**Future Work. ** 
+
+
+## Usage
+
+### Prerequisites
 
 - [Python 2.7](https://www.python.org/download/releases/2.7/)
 - [Tensorflow 1.1.14](https://www.tensorflow.org/versions/r1.14/api_docs/python/tf)
@@ -158,36 +209,30 @@ Deep Neural Networks usually face the degradation problem. In this approach we a
 - [scikit-video](http://www.scikit-video.org/stable/io.html)
 - [OpenCV2](https://pypi.org/project/opencv-python/)
 
-## Usage
+### Commands
+1. Download dataset from Google Cloud first. Put it in *0_data* directory and unzip it.
 
-Download dataset from Google Cloud first.
-Put it in *0_data* directory and unzip it.
-
-#### Generate file lists
+2. #### Generate file lists
 ```Shell
 python generate_file_list.py
 ```
 
-#### Training
+3. #### Training
 ```Shell
 python train.py
 ```
 
-#### Testing
+4. #### Testing
 ```Shell
 python test.py [test_case]
 ```
-test_case can be:
-
-0   test on training set
-
-1   test on validation set
-
-2   test on test set(save npy results)
-
-3   test on customized set
-
+<p>**test_case** can be:
+**0**		test on training set
+**1**		test on validation set
+**2**		test on test set(save npy results)
+**3**		test on customized set
 All cases save mp4 output videos, while case 2 saves extra npy results.
+</p>
 
 ## References
 [1] [Learning to See in the Dark](https://arxiv.org/pdf/1805.01934.pdf). Chen Chen, Qifeng Chen, Jia Xu and Vladlen Koltun. The IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2018.
