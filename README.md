@@ -5,7 +5,10 @@
 This project is aim to directly enhance extreme low light videos captured by ordinary cameras. This project is implemented by [Haiyang Jiang](https://github.com/MichaelHYJiang), [Boyuan Wang](https://github.com/wangby511), [Feng Chi](https://github.com/chifeng1113), [Yue Qin](https://github.com/qiny9492) and [Hongfa Huang](https://github.com/gordonxwong).
 
 ## Motivations
-Current solutions to such problem mainly involve near-infrared (NIR) LED or diodes. They help to gain better vision in low-light environments but also introduce drawbacks compared to natural light cameras. Inevitably, additional energy consumption and heat generation with the presence of extra light sources can increase operation and maintenance costs of a system. More significantly, visible color and texture information could suffer from extensive loss by using such system.
+The extreme dark video enhancements could be applied to many cases nowadays. Some documentaries shold be shooted without the artificial light in order not to interfere with the environment ,disturbing the animals, for examples. In addition, some video evidences presented to the court might be caught by a CCTV in a dark enviroment. Moreover, every one holding a smart phone has easy access to take the videos. Our extreme dark video enhancements can help to reproduce the dark documentary videos in a high-quality visible version, to make the video evidences bright and clear without missing the important details ,and to let video shooting ametaurs not worry too much about controlling the light in their shooting environments.
+
+However,current solutions to such problem mainly involve near-infrared (NIR) LED or diodes. They help to gain better vision in low-light environments but also introduce drawbacks compared to natural light cameras. Besides, the inevitable energy consumption and heat generation with the presence of extra light sources can increase operation and maintenance costs of a system. More significantly, visible color and texture information could suffer from extensive loss by using such system. Thus, we want to train a dark vedio enhancement network which can dramatically save the maintenance cost and ensure our vedio qualities.
+
 
 <p align="center">
     <img src="figure/definition.png" height="400"/>,
