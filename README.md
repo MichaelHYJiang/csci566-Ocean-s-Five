@@ -100,7 +100,8 @@ Baseline updates loss for one sample in an epoch (SGD). We modify network and tr
 
 ### Approach3 ResNet
 
-Deep Neural Networks usually face the degradation problem. In this approach we add a residual to the previous value to each block of layers rather than produce an entirely new value. It is easy to represent the identity function. We replace our convolution blocks in Unet with residual blocks and add 1x1x1 convolution projection on input to match dimension.
+Deep Neural Networks usually face the degradation problem. In this approach we add a residual to the previous value to each block of layers rather than produce an entirely new value. We replace our convolution blocks in Unet with residual blocks. Since there are lots
+of dimention changes in Unet, we have to add a 1x1x1 convolution projection on input to match dimension.
 
 ![Residual Block](figure/resnet.png)
 
@@ -112,6 +113,11 @@ Deep Neural Networks usually face the degradation problem. In this approach we a
 |ResNet | 0.02898007 | 0.03173088 | 27.4375552 | 0.841417162 | 0.18700 |
 
 ![ResNet Training](figure/resnet_result.png)
+
+**Conclusions**
+The adoption of Residual Blocks improved all metrics across the board, also the additional 1x1x1 convolution projection didn't indroduce
+noticable training time increase. The tensorboard graph shows that loss optimization is much more stable in the case of ResNet which is
+expected.
 
 ### Approach4 GAN
 
