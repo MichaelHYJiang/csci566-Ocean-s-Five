@@ -25,6 +25,7 @@ This project aims to directly enhance extreme low light videos captured by ordin
    * [Usage](#usage)
       * [Prerequisites](#prerequisites)
       * [Commands](#commands)
+   * [Q&A](#q&a)
    * [References](#references)
    * [Author Information](#author)
 
@@ -168,7 +169,7 @@ After playing with a number manually designed loss functions, we decided to move
 
 ![Discriminator](figure/gan.png)
 
-It outputs a likelihood of its inputs' authenticity. Cross entropy loss on discriminator's outputs is used. A 16-frame output video is set as a training input image batch ("fake batch", batch size = 16) with labels being all zero, while its corresponding 16-frame ground truth video is another batch ("real batch", batch size = 16) with labels being all one. Generator and discriminator update their weights separately, with former depending on cross entropy loss of a fake batch, and latter on that of both batches. Zeros and ones are set accordingly, as is the case in homework2 of this course.
+It outputs a likelihood of its inputs' authenticity. Cross entropy loss on discriminator's outputs is used. A 16-frame output video is set as a training input image batch ("fake batch", batch size = 16) with labels being all zero, while its corresponding 16-frame ground truth video is another batch ("real batch", batch size = 16) with labels being all one. Generator and discriminator update their weights separately, with former depending on cross entropy loss of a fake batch, and latter on that of both batches. Zeros and ones are set accordingly, as the case in homework2 of this course.
 
 **Results** 
 
@@ -239,18 +240,38 @@ python train.py
 ```Shell
 python test.py [test_case]
 ```
-<p>**test_case** can be:
+**test_case** can be:
+
 **0**		test on training set
+
 **1**		test on validation set
+
 **2**		test on test set(save npy results)
+
 **3**		test on customized set
+
 All cases save mp4 output videos, while case 2 saves extra npy results.
-</p>
 
 5. #### Evaluation
 ```Shell
 python psnr_ssim_mabd.py
 ```
+
+## Q&A
+A summary of answers during question session on presentation of Dec. 3rd.
+
+1. How did you acquire your dataset?
+
+#### Ans: Original dataset was from paper [[3]](#references). In that paper a novel optical system is put forward. It consists of a beam splitter, a neutral density filter, a signal generator and 2 cameras. It can record pairs of bright and dark videos of the exact same scene at the same time. We described a little about it in our report section [Dataset](#dataset). More details can be found in the original paper. The dataset was originally designed for the dark video enhancement of tasks. In our project, we downsampled it by a factor of 3 on both height and width of frames.
+
+2. Was the videos filmed during night or under the daylight?
+
+#### Videos of the original dataset were all filmed at sufficiently illuminated places, because it needs to generate bright videos as ground truths. However, both paper [[3]](#references) and our project tested on real world night videos and achieved visually pleasing results. (See [demo video](https://youtu.be/XTlWN0xPwQE))
+
+3. How was your result compared to state-of-the-art methods?
+#### We compared our best solution, a ResNet model, with a CVPR' 18 [[1]](#references) method, a BMVC' 18 [[2]](#references) method, and an ICCV' 19 [[3]](#references) method. The CVPR' 18 is a image enhancement method that has way less stability along time axis than ours. The BMVC' 18 one trained slower, requires larger computational resources. It introduced artifacts into its results. The ICCV' 19 one was trained on the original high definition dataset, and introduces more blur than our updated models. Quantitative results of these comparisons can be found in [Benchmarking](#benchmarking) of this report. Qualitative comparisons are in our [demo video](https://youtu.be/XTlWN0xPwQE).
+
+
 
 ## References
 [1] [Learning to See in the Dark](https://arxiv.org/pdf/1805.01934.pdf). Chen Chen, Qifeng Chen, Jia Xu and Vladlen Koltun. The IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2018.
