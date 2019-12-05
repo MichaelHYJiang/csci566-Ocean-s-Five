@@ -100,7 +100,7 @@ In addition to the Baseline model, we also use Histogram Equalization, add GAN, 
 
 Deep Neural Networks usually face the degradation problem. In this approach we add a residual to the previous value to each block of layers rather than produce an entirely new value. It is easy to represent the identity function. We replace our convolution blocks in Unet with residual blocks and add 1x1x1 convolution projection on input to match dimension.
 
-![Network](figure/3D-U-Net.png)
+![Residual Block](figure/resnet.png)
 
 **Results** 
 
