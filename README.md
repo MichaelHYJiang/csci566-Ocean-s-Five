@@ -15,6 +15,7 @@ This project aims to directly enhance extreme low light videos captured by ordin
       * [Dataset](#dataset)
       * [Pipeline](#pipeline)
    * [Experiments](#experiments)
+      * [Baseline](#baseline)
       * [Approach 1: Batch Update](#approach-1-batch-update)
       * [Approach 2: Multiple Loss Functions](#approach-2-multiple-loss-functions)
       * [Approach 3: Residual Blocks](#approach-3-residual-block)
@@ -187,7 +188,7 @@ Multi-Loss1, ResNet and GAN all show better measurements than the baseline model
 |ResNet | 27.438↑ | 0.84142↑ | 0.18700↓ |
 |GAN | 27.384↑ | 0.84086↑ | 0.14062↓ | 
 
-We picked ResNet as our best model to compete against three state-of-the-art dark image/video enhancement methods [[1][2][3]](#references).
+We picked ResNet as our best model to compete against three state-of-the-art dark image/video enhancement methods [[1][2][3]](#references). Implementations of [[1]](#references) and [[2]](#references) can be found in [state-of-the-art](./state-of-the-art/) folder in this repository. They were trained on our downsampled dataset with modifications to make them run smoothly. [[3]](#reference) has a publicly available checkpoint file. We used that directly.
 
 |Setting| PSNR | SSIM | MSE (MABD) Unit: 10^-3 |
 | --- | --- | --- | --- |
@@ -196,16 +197,20 @@ We picked ResNet as our best model to compete against three state-of-the-art dar
 |BMVC 2018[[2]](#references) | 24.600 | 0.79418 | 0.18450 |
 |ICCV 2019[[3]](#references) | 22.891 | 0.73099 | 0.22020 |
 
+From the chart above, we can see that our method achieved the best result among all contestants. Qualitative results corroborates this fact. They are included in our [demo video](https://youtu.be/XTlWN0xPwQE).
+
 ## Conclusion
-Modifications show improvements. (GAN, ResNet, loss functions, batch update, etc.)
-Comparable and better than the state-of-the-art on our dataset.
+* Successfully implemented a extreme dark video enhancement method.
+* Modifications show improvements to original model. (GAN, ResNet, MultiLoss v.s. baseline)
+* Achieved Comparable and even better than the state-of-the-art on our dataset.
 
 **Limitations.** 
-Downsampled dataset.
-Not thoroughly searched for all possible combinations. (Time and Computation resource limits)
+* All training, test, evaluation are done only on the downsampled dataset.
+* Not thoroughly searched for all possible combinations. (Time and Computation resource limits)
 
 **Future Work.** 
-
+* Ensemble / combinations of optimizations.
+* Develope new layers / branches that takes in histogram information. (Incoporate histogram equalization into the network)
 
 ## Usage
 
@@ -241,6 +246,11 @@ python test.py [test_case]
 **3**		test on customized set
 All cases save mp4 output videos, while case 2 saves extra npy results.
 </p>
+
+5. #### Evaluation
+```Shell
+python psnr_ssim_mabd.py
+```
 
 ## References
 [1] [Learning to See in the Dark](https://arxiv.org/pdf/1805.01934.pdf). Chen Chen, Qifeng Chen, Jia Xu and Vladlen Koltun. The IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2018.
