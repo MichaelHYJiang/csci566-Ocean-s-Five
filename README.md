@@ -63,13 +63,13 @@ Baseline updates loss for one sample in an epoch (SGD). We modify network and tr
 
 | | Final Loss | Final Validation Loss | PSNR | SSIM | MSE (MABD) Unit: 10^-3 |
 | --- | --- | --- | --- | --- | --- |
-| 1 (baseline) | 0.039408 | 0.044127 | 24.753451|0.788749|2.945|
+| 1 (baseline) | 0.03941 | 0.04413 | 24.75345|0.78875|2.94543|
 | 10 | 0.24857 | 0.21656 | 12.41236 | 0.42548 | 8.00733|
 | 23 | 0.25735 | 0.23038 | 11.78491 | 0.36570 | 8.03293|
 
 **Conclusions** 
 * Use batch size > 1 can speed up the training process. (batch size = 10 is 2 times faster than baseline)
-* When batch size is large, it uses more memory to train. In this case, I choose 8 CPU 15GB memory for the virtual machine, it cannot handle batch size > 23.
+* When batch size is large, it uses more memory to train. In this case, I choose 30GB memory for the virtual machine, it cannot handle batch size > 23.
 * Batch size causes the loss, PSNR, SSIM etc. to converge slower than baseline, if we use the same epoch.
 
 ### Approach2 Add Multi Loss
