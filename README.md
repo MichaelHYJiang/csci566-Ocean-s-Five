@@ -106,8 +106,8 @@ Baseline updates loss for one sample in an iteration (i.e. similar to SGD). We m
 |Batch Size | Final Loss | Final Validation Loss | PSNR | SSIM | MSE (MABD) Level: 10^-3 |
 | --- | --- | --- | --- | --- | --- |
 | 1 (baseline) | 0.029254 | 0.031946 | 27.203 | 0.83994 | 0.72762 |
-| 10 | 0.24857 | 0.21656 | 12.41236 | 0.42548 | 8.00733|
-| 23 | 0.25735 | 0.23038 | 11.78491 | 0.36570 | 8.03293|
+| 10 | 0.24857 | 0.21656 | 12.412 | 0.42548 | 8.0073|
+| 23 | 0.25735 | 0.23038 | 11.785 | 0.36570 | 8.0329|
 
 **Conclusions** 
 * Use batch size > 1 can speed up the training process. (batch size = 10 is 2 times faster than baseline)
@@ -129,11 +129,11 @@ Baseline updates loss for one sample in an iteration (i.e. similar to SGD). We m
 |Loss | Final Loss | Final Validation Loss | PSNR | SSIM | MSE (MABD) Unit: 10^-3 |
 | --- | --- | --- | --- | --- | --- |
 | L1 Loss (baseline) | 0.029254 | 0.031946 | 27.203 | 0.83994 | 0.72762 |
-| Structure Loss | 0.18124 | 0.20149 | 26.70764 | 0.85367↑ | 1.5242 |
-| Region Loss | 0.15896 | 0.17681 |27.23463↑ | 0.84026↑ | 0.48029↓ |
-|VGG Loss (Add vgg19) | 139.36647 | 150.83625 | 27.02222 | 0.83217 | 0.1627↓|
-|Multi Loss1 (Str Reg VGG) |1.75286 |1.91280 | 27.22877↑ | 0.84750↑ | 0.37438↓|
-|Multi Loss2 (L1 Str Reg) | 0.35868 | 0.40669 | 27.06469 | 0.852218↑ | 2.392↓ | 
+| Structure Loss | 0.18124 | 0.20149 | 26.708 | 0.85367↑ | 1.5242 |
+| Region Loss | 0.15896 | 0.17681 |27.235↑ | 0.84026↑ | 0.48029↓ |
+|VGG Loss (Add vgg19) | 139.37 | 150.84 | 27.022 | 0.83217 | 0.16277↓|
+|Multi Loss1 (Str Reg VGG) |1.7529 |1.9128 | 27.229↑ | 0.84750↑ | 0.37438↓|
+|Multi Loss2 (L1 Str Reg) | 0.35868 | 0.40669 | 27.065 | 0.85222↑ | 2.3925↓ | 
 
 (Arrows denote advantage over baseline model.)
 
