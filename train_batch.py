@@ -186,7 +186,7 @@ def main():
             order_frame = [(one, y) for y in [t for t in np.random.permutation(ALL_FRAME - CROP_FRAME) if t % FRAME_FREQ == 0] for one in order]
 
             index = np.random.permutation(len(order_frame))
-            # added
+            # added batch size here
             iters_per_epoch = int(len(index) / BATCH_SIZE)
             g_loss = np.zeros((iters_per_epoch, 1))
 
@@ -196,7 +196,7 @@ def main():
                 st = time.time()
                 for i in range(BATCH_SIZE):
                     idx = index[i + iter * BATCH_SIZE]
-            # added end
+            
             # for idx in index:
 
                     ind, start_frame = order_frame[idx]
