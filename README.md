@@ -8,7 +8,7 @@ This project is aim to directly enhance extreme low light videos captured by ord
 Current solutions to such problem mainly involve near-infrared (NIR) LED or diodes. They help to gain better vision in low-light environments but also introduce drawbacks compared to natural light cameras. Inevitably, additional energy consumption and heat generation with the presence of extra light sources can increase operation and maintenance costs of a system. More significantly, visible color and texture information could suffer from extensive loss by using such system.
 
 <p align="center">
-    <img src="figure/definition.png" height="72"/>,
+    <img src="figure/definition.png" height="400"/>,
 </p>
 
 ## Problem Descriptions and Dataset
@@ -18,13 +18,13 @@ A subset of key frames are shown in following figure. Videos in our dataset are 
 9 frames are around 340 × 620 pixels. All raw data have been packed and stored in numpy arrays for fast read-in and convenience of processing.
 
 <p align="center">
-    <img src="figure/origin_dataset.png" height="72"/>,
+    <img src="figure/origin_dataset.png" height="500"/>,
 </p>
 
 We also provide a comparison between input frames and their corresponding ground truth frames in Figure 4, to illustrate pixel-level alignment between training input and ground truth. It can be seen from the figure that there are challenges of low contrast, high noise level, and unnatural color mapping in our task. Alignment between frames in input videos (left) and ground truth videos (right). Frames of input videos are linearly scaled to provide more details of objects and noise level.
 
 <p align="center">
-    <img src="figure/origin_dataset2.png" height="72"/>,
+    <img src="figure/origin_dataset2.png" height="350"/>,
 </p>
 
 | | Number of video pairs | Number of Frames |
@@ -38,7 +38,7 @@ We also provide a comparison between input frames and their corresponding ground
 We use U-Net model as the basic network in our project. The U-Net is originally used for segmentation of images in medical and biomedical fields by using convolutional networks with upsampling functions. For the type of our input data is video, we modify the dimensions of input to the network from 2D to 3D. Hence, we use a 3D-Convolution and 2D-Pooling U-Net and we also control the depth of U-Net between two and four, typically in three. The following figure illustrates the details about our network structure.
 
 <p align="center">
-    <img src="figure/3D-U-Net.png" height="72"/>,
+    <img src="figure/3D-U-Net.png" height="500"/>,
 </p>
 
 During the training approach, we cut the video data into pieces with cropping and flipping action before feeding it into the network. For example, we select piece of 16 × 256 × 256. In this piece, 16 represents number of frames and 256 represents both height and width. After the training step, we saved the trained model into a file. During the test phase, we load the model again and use it to transfer the new video data to a new generated video by cutting it into pieces just like the size in the training approach. Then we send them into the network and concatenate the output pieces together with a bit overlapping.
@@ -91,7 +91,7 @@ In addition to the Baseline model, we also use Histogram Equalization, add GAN, 
 
 Deep Neural Networks usually face the degradation problem. In this approach we add a residual to the previous value to each block of layers rather than produce an entirely new value. It is easy to represent the identity function. We replace our convolution blocks in Unet with residual blocks and add 1x1x1 convolution projection on input to match dimension.
 <p align="center">
-    <img src="figure/resnet.png" height="72"/>,
+    <img src="figure/resnet.png" height="400"/>,
 </p>
 
 **Results** 
@@ -102,13 +102,13 @@ Deep Neural Networks usually face the degradation problem. In this approach we a
 |ResNet | 0.02898007 | 0.03173088 | 27.4375552 | 0.841417162 | 0.18700 |
 
 <p align="center">
-    <img src="figure/resnet_result.png" height="72"/>,
+    <img src="figure/resnet_result.png" height="500"/>,
 </p>
 
 ### Approach4 GAN
 
 <p align="center">
-    <img src="figure/gan.png" height="72"/>,
+    <img src="figure/gan.png" height="400"/>,
 </p>
 
 **Results** 
