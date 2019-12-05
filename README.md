@@ -2,60 +2,86 @@
 
 #### USC 2019 Fall CSCI 566 Course Project
 #### Team Name : *Ocean's Five* 
-This project aims to directly enhance extreme low light videos captured by ordinary cameras. This TensorFlow implementation is written by [Haiyang Jiang](https://github.com/MichaelHYJiang), [Boyuan Wang](https://github.com/wangby511), [Feng Chi](https://github.com/chifeng1113), [Yue Qin](https://github.com/qiny9492) and [Hongfa Huang](https://github.com/gordonxwong).
+This project aims to directly enhance extreme low light videos captured by ordinary cameras.
 
 ### [Demo Video](https://youtu.be/XTlWN0xPwQE)
+---
+
+#### Table of Contents
 
    * [Motivation](#motivation)
-   * [Problem Descriptions and Dataset](#problem-descriptions-and-dataset)
-   * [Approaches](#approaches)
-      * [Approach 1: Batch Update](#approach1-add-batch-size)
-      * [Approach 2: Multiple Loss Functions](#approach2-add-multi-loss)
-      * [Approach 3: Residual Blocks](#approach3-resnet)
-      * [Approach 4: GAN](#approach4-gan)
-   * [Prerequisites](#prerequisites)
+   * [Problem Statement](#problem-statement)
+   * [Methodology](#methodology)
+      * [Dataset](#dataset)
+      * [Pipeline](#pipeline)
+   * [Experiments](#experiments)
+      * [Approach 1: Batch Update](#approach-1-batch-update)
+      * [Approach 2: Multiple Loss Functions](#approach-2-multiple-loss-functions)
+      * [Approach 3: Residual Blocks](#approach-3-residual-block)
+      * [Approach 4: GAN](#approach-4-gan)
+   * [Qualitative Result](#qualitative-result)
+   * [Conclusion](#conclusion)
    * [Usage](#usage)
+      * [Dependencies](#dependencies)
+      * [Commands](#commands)
    * [References](#references)
-   * [Author](#author)
+   * [Author Information](#author)
 
 ## Motivation
-The extreme dark video enhancements could be applied to many cases nowadays. Some documentaries should be shooted without any artificial light in order not to interfere with the environment, disturbing the animals, for example. In addition, some video evidences presented to the court might be recorded by a CCTV in a dark enviroment. Moreover, every one holding a smart phone has easy access to taking videos. Our extreme dark video enhancements can help to reproduce the dark documentary videos in a high-quality visible version, to make the video evidences bright and clear without missing the important details, and to let video shooting ametaurs not worry too much about controlling the light in their shooting environments.
+Restoring information from extreme dark videos has vast practical potentials. For instance, documentary filming that requires zero artificial light source, like observation of wild animals at night; surveillance footage of dark places; and autonomous driving systems at night, etc.
 
-However, current solutions to such problem mainly involve near-infrared (NIR) LED or diodes. They help to gain better vision in low-light environments but also introduce drawbacks compared to natural light cameras. Besides, the inevitable energy consumption and heat generation with the presence of extra light sources can increase operation and maintenance costs of a system. More significantly, visible color and texture information could suffer from extensive loss by using such systems. Thus, we want to train a dark video enhancement network which can dramatically save the maintenance cost and ensure our vedio qualities.
-
+Current industrial solutions to such cases mainly involve near-infrared (NIR) LED. They help to gain better vision in low-light environments but also introduce drawbacks compared to natural light cameras. The inevitable energy consumption and heat generation with the presence of extra light sources can increase operation and maintenance costs. More significantly, visible color and texture information could suffer from extensive loss by using such systems. Thus, we want to train a dark video enhancement network which can dramatically save the maintenance cost and ensure our vedio qualities.
 
 ![Definition](figure/definition.png)
 
-## Problem Descriptions and Dataset
-Our dataset includes 179 video pairs of street views with moving vehicles and pedestrians under different conditions. Each video pair is of 200 frames taken by a beam splitter. It feeds light into two cameras concurrently and one of them is equipped with a neutral density filter. In this way, we obtain perfect match videos with just light illumination differences. The input format is raw sensor data with Bayer filters to ensure sufficient information against noise level under low light environments. The input, dark videos are chronologically organized raw images. The output, bright videos are in sRGB space, encoded in mp4 format for the convenience of visualizing and post-processing.
+## Problem Statement
+Enhancing dark videos from raw sensor data is challenging in that:
 
-A subset of key frames are shown in following figure. Videos in our dataset are down-sampled with a factor of 3 on width and height (i.e. 1/9 of original size), in order to save training and testing time. Sizes of down-sampled frames are around 340 × 620 pixels. All raw data have been packed and stored in numpy arrays for fast read-in and convenience of processing.
+1. inputs are noisy;
+2. there is temporal continuity among frames;
+3. denoising incurs blur.
+
+Extreme dark videos are of low contrast, distorted color mapping, and high noise level. Low-light scenes usually have low signal-to-noise (SNR) rate. Useful information is compressed in a narrow range of pixel values, while noises can easily reach similar or even stronger responses on optical sensors. With light intensity being small, sensors' response curves to various light frequencies are likely to change, different from those that are under well illuminated circumstances. This changes recorded color mapping of objects.
+For videos, they not just a stack of pictures. They are pictures in specific seqences. Ordering intails context information among time axis. Restoring from frames separately can bring visible instability over time. 
+Lastly, denoising algorithms often require knowledge on adjacent or global pixel values, and use an average/median value to estimate outliers which will later be viewed as a noise point and adjusted. However, this dampens sharp transitions of edges, in which case pictures become, to some extent, blurry.
+Although, admittedly there is no theoretical optimal solution for these three aspects yet, our method tries to reach a possible balance among them.
+
+## Methodology
+### Dataset
+Original dataset is from paper [[3]](#reference). A novel optical system with a beam splitter, a neutral density (ND) filter and a signal generator was built to collect 179 video pairs of street views with moving vehicles and pedestrians. The beam splitter feeds light into two synchronized cameras concurrently and one of the cameras is equipped with an ND filter. In this way, perfectly matched videos with only light illumination differences can be obtained. The input dark videos are chronologically organized Bayer pattern filtered raw images. The ground truth bright videos are in sRGB space, encoded in mp4 format for the convenience of visualizing and post-processing.
+
+We down-sampled the videos with a factor of 3 on width and height (i.e. 1/9 of original size), in order to save training and testing time. Sizes of down-sampled frames are around 340 × 620 pixels. All raw data have been packed and stored in numpy arrays for fast read-in and convenience of processing. A subset of key frames are shown in the following figure.
 
 ![Data Example](figure/origin_dataset.png)
 
-We also provide a comparison between input frames and their corresponding ground truth frames in Figure 4, to illustrate pixel-level alignment between training input and ground truth. It can be seen from the figure that there are challenges of low contrast, high noise level, and unnatural color mapping in our task. Alignment between frames in input videos (left) and ground truth videos (right). Frames of input videos are linearly scaled to provide more details of objects and noise level.
+We also provide a comparison between linearly scaled input frames and their corresponding ground truth frames in the next figure, to illustrate pixel-level alignment between training input and ground truth. Frames of input videos are linearly scaled to provide more details of objects and noise level. It can be seen from the figure that there are challenges of low contrast, high noise level, and unnatural color mapping in our task. 
 
 ![Data Example 2](figure/origin_dataset2.png)
 
-| | Number of video pairs | Number of Frames |
+| Dataset | Number of video pairs | Number of Frames |
 | --- | --- | --- |
 | Training | 125 | 200 |
 | Validation | 27 | 200 |
 | Test | 27 | 200 |
 
-## Approaches
+### Pipeline
 
-We use U-Net model as the basic network in our project. The U-Net is originally used for segmentation of images in medical and biomedical fields by using convolutional networks with upsampling functions. For the type of our input data is video, we modify the dimensions of input to the network from 2D to 3D. Hence, we use a 3D-Convolution and 2D-Pooling U-Net and we also control the depth of U-Net between two and four, typically in three. The following figure illustrates the details about our network structure.
+**Pre-processing.** A global histogram equalization approach is adopted. The reason for this operation is that it can largely help alleviate low contrast problem in frames. With less challenge, training a neural network can be more tractable. A smaller model can be used as well with less risk of overfitting. Another reason for this pre-processing is that, for a fully convolutional network (FCN, as in [[1]](#references), [[2]](#references), [[3]](#references)), even in its bottleneck layers, a pixel in a feature map cannot cover a complete range of vision in the original frames. It can only connect to a smaller window in the input images/videos. This makes FCN requires much harder work to learn a global transformation, which is why we single out a global change into becoming a pre-processing step.
+Videos in our training set had been histogram equalized before being saved as npy files so that this pre-processing step can be skipped during training phase. A histogram equalization function is applied to videos before being sent into our network during test phase.
+
+**Network.** We use a 3D U-Net model as the basic network in our project. The U-Net is originally used for segmentation of images in medical and biomedical fields by using convolutional networks with upsampling functions. Because the type of our input data is video, we modified the dimensions of input to the network from 2D to 3D. We use 3D convolution layers, yet, keep pooling layers being 2D, for the reason that downsampling on time axis would affect temporal continuity. The depth of U-Net, denoted by the number of downsampling layers, between two and four, typically in three. The following figure illustrates the details about our network structure.
 
 ![Network](figure/3D-U-Net.png)
 
-During the training approach, we cut the video data into pieces with cropping and flipping action before feeding it into the network. For example, we select piece of 16 × 256 × 256. In this piece, 16 represents number of frames and 256 represents both height and width. After the training step, we saved the trained model into a file. During the test phase, we load the model again and use it to transfer the new video data to a new generated video by cutting it into pieces just like the size in the training approach. Then we send them into the network and concatenate the output pieces together with a bit overlapping.
+**Training. ** Theoretically, FCNs like U-Net can take in inputs with arbitrary sizes, since there are only conv, pool, deconv layers, no fully connected layers. However, we had to crop the input into small pieces due to the GPU memory limitation. The crop size we used is 16 × 128 × 128. 16 represents number of frames and 128 represents height and width. Random flipping and transpose on spatial dimensions were carried out for data augmentation purpose. We used Adam optimizer with default parameters (except for learning rate). Loss function is L1 loss between output videos and corresponding areas in ground truth. Initial learning rate is 10^-4, and it decays to 10^-5 after 30 epochs. Entire training process proceeded for 60 epoches. This setting is defined as our Baseline Approach.
 
-Currently, we are using Adam optimizer and L1 loss between generated videos and ground truth to train the model. This is defined as our Baseline Approach.
+## Experiments
+
+### Baseline
 
 In addition to the Baseline model, we also use Histogram Equalization, add GAN, ResNet as well as function of multi losses and update hyper parameters to optimize the current algorithm as well as improving experiment different metrics.
 
-### Approach1 Add Batch Size
+### Approach 1 Batch Update
 
 Baseline updates loss for one sample in an epoch (SGD). We modify network and train process to make the code suitable for mini-batch gradient descent. Due to the memory limitation, we only test batch size <= 23.
 
@@ -72,7 +98,7 @@ Baseline updates loss for one sample in an epoch (SGD). We modify network and tr
 * When batch size is large, it uses more memory to train. In this case, I choose 8 CPU 15GB memory for the virtual machine, it cannot handle batch size > 23.
 * Batch size causes the loss, PSNR, SSIM etc. to converge slower than baseline, if we use the same epoch.
 
-### Approach2 Add Multi Loss
+### Approach 2 Multiple Loss Functions
 
 1. **L1-Loss**. This loss is used in baseline. It computes average absolute difference for each pixel.
 
@@ -98,7 +124,7 @@ Baseline updates loss for one sample in an epoch (SGD). We modify network and tr
 * Using higher conv layer outputs difference of VGG network as loss does not help improve the result.
 * Using the combination loss of L1 loss, Regional loss and Structure loss for training can improve both MABD and SSIM.
 
-### Approach3 ResNet
+### Approach 3 Residual Block
 
 Deep Neural Networks usually face the degradation problem. In this approach we add a residual to the previous value to each block of layers rather than produce an entirely new value. It is easy to represent the identity function. We replace our convolution blocks in Unet with residual blocks and add 1x1x1 convolution projection on input to match dimension.
 
@@ -113,7 +139,7 @@ Deep Neural Networks usually face the degradation problem. In this approach we a
 
 ![ResNet Training](figure/resnet_result.png)
 
-### Approach4 GAN
+### Approach 4 GAN
 
 ![Discriminator](figure/gan.png)
 
@@ -170,8 +196,8 @@ All cases save mp4 output videos, while case 2 saves extra npy results.
 
 [3] [Learning to See Moving Objects in the Dark](http://openaccess.thecvf.com/content_ICCV_2019/papers/Jiang_Learning_to_See_Moving_Objects_in_the_Dark_ICCV_2019_paper.pdf). Haiyang Jiang and Yinqiang Zheng.  Learning to see moving objects in the dark.  The IEEE International Conference on Computer Vision (ICCV), October 2019.
 
-## Author
-**Ocean's Five**
+## Author Information
+This TensorFlow implementation is written by **Ocean's Five**
 * [Haiyang Jiang](https://github.com/MichaelHYJiang), haiyangj@usc.edu
 * [Boyuan Wang](https://github.com/wangby511), boyuanwa@usc.edu
 * [Feng Chi](https://github.com/chifeng1113), chi721@usc.edu
