@@ -117,6 +117,8 @@ Baseline updates loss for one sample in an iteration (i.e. similar to SGD). We m
 * Use batch size > 1 can speed up the training process. (batch size = 10 is 2 times faster than baseline)
 * When batch size is large, it uses more memory to train. In this case, I choose 30GB memory for the virtual machine, it cannot handle batch size > 23.
 * When batch size is larger, the performance actually becomes worse, as loss and MSE are larger, but PSNR and SSIM are smaller.
+* From the loss information after each update, it seems that mini-batch jumps into local minimum and gets stuck in it, while SGD jumps out of local minimum and get global minimum.
+* Because of the memory limitation, we do not test batch size > 23, maybe there will be better batch size to fit this network and perform better than baseline.
 
 ### Approach 2 Multiple Loss Functions
 
