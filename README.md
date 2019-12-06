@@ -140,7 +140,7 @@ Baseline updates loss for one sample in an iteration (i.e. similar to SGD). We m
 | Region Loss | 0.15896 | 0.17681 |27.235↑ | 0.84026↑ | 0.48029↓ |
 |VGG Loss (Add vgg19) | 139.37 | 150.84 | 27.022 | 0.83217 | 0.16277↓|
 |Multi Loss1 (Str Reg VGG) |1.7529 |1.9128 | 27.229↑ | 0.84750↑ | 0.37438↓|
-|Multi Loss2 (L1 Str Reg) | 0.35868 | 0.40669 | 27.065 | 0.85222↑ | 2.3925↓ | 
+|Multi Loss2 (L1 Str Reg) | 0.35868 | 0.40669 | 27.065 | 0.85222↑ | 2.3925 | 
 
 (Arrows denote advantage over baseline model.)
 
@@ -192,7 +192,7 @@ Multi-Loss1, ResNet and GAN all show better measurements than the baseline model
 
 |Setting| PSNR | SSIM | MSE (MABD) Unit: 10^-3 |
 | --- | --- | --- | --- |
-|Multi Loss1| 27.22877↑ | 0.84750↑ | 0.37438↓| 
+|Multi Loss1| 27.229↑ | 0.84750↑ | 0.37438↓| 
 |ResNet | 27.438↑ | 0.84142↑ | 0.18700↓ |
 |GAN | 27.384↑ | 0.84086↑ | 0.14062↓ | 
 
