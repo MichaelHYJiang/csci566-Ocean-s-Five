@@ -110,8 +110,9 @@ Baseline updates loss for one sample in an iteration (i.e. similar to SGD). We m
 | 1  | 0.030137 | 0.037942 | 26.301 | 0.82867 | 0.56897|
 | 10 | 0.25526 | 0.20713 | 12.733 | 0.44953 | 5.2412|
 | 23 | 0.25735 | 0.23038 | 11.785 | 0.36570 | 8.0329|
-* Baseline is using original network and training process without batch size. Epoch = 60, Group number = 12
+* Baseline is using original network and training process without batch update. Epoch = 60, Group number = 12
 * Batch size = 1, 10, 23 are using modified network with mini-batch weight update. For memory and time limitation, we set epoch = 30, group number = 5. Other parameters are the same as baseline.
+* Group number is an implement parameter to control number of videos read into the memory at each time. It is different from batch size. For each cropped video, losses are back-propagated separately. While in the batch update settings, losses are back-propagated together after iterations on all instances in a batch.
 
 **Conclusions** 
 * Use batch size > 1 can speed up the training process. (batch size = 10 is 2 times faster than baseline)
