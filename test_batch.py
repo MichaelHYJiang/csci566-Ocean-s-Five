@@ -66,10 +66,10 @@ def equalize_histogram(image, number_bins=256):
 
 def process_video(sess, in_image, out_image, in_file, raw, out_file=None):
     input_patch = raw
-    
+
     if DEBUG:
         print '[DEBUG] (begining of preocess_video) input_patch.shape:', input_patch.shape
-    
+
     i = 0
     j = 0
     k = 0
@@ -106,7 +106,7 @@ def process_video(sess, in_image, out_image, in_file, raw, out_file=None):
                 network_output = sess.run(out_image, feed_dict={in_image: network_input})
                 if DEBUG:
                     print '[DEBUG] network_output.shape:', network_output.shape
-                
+
                 if i + TEST_CROP_FRAME > i_range:
                     temp = network_output[0, :i_range - i, :, :, :]
                 else:
@@ -115,15 +115,15 @@ def process_video(sess, in_image, out_image, in_file, raw, out_file=None):
                 output[i: i + TEST_CROP_FRAME, j * 2: (j + TEST_CROP_HEIGHT) * 2, k * 2: (k + TEST_CROP_WIDTH) * 2, :] += (network_output * OUT_MAX).astype('uint16')
                 weights[i: i + TEST_CROP_FRAME, j * 2: (j + TEST_CROP_HEIGHT) * 2, k * 2: (k + TEST_CROP_WIDTH) * 2, :] += 1
                 k += int(TEST_CROP_WIDTH * step)
-        j += int(TEST_CROP_HEIGHT * step)
-    i += int(TEST_CROP_FRAME * step)
+            j += int(TEST_CROP_HEIGHT * step)
+        i += int(TEST_CROP_FRAME * step)
 
-output = (output / weights).astype('uint8')
+    output = (output / weights).astype('uint8')
 
-if out_file is None:
-    out_file = os.path.basename(in_file)[:-4] + '.mp4'
-    if DEBUG:
-        print '[DEBUG] out_file:', out_file
+    if out_file is None:
+        out_file = os.path.basename(in_file)[:-4] + '.mp4'
+        if DEBUG:
+            print '[DEBUG] out_file:', out_file
     print '[PROCESS] Processing done. Saving...',
     t0 = time.time()
     vwrite(TEST_RESULT_DIR + out_file, output)
@@ -138,7 +138,7 @@ def main():
     in_image = tf.placeholder(tf.float32, [None, TEST_CROP_FRAME, None, None, 4])
     gt_image = tf.placeholder(tf.float32, [None, TEST_CROP_FRAME, None, None, 3])
     out_image = network(in_image)
-    
+
     saver = tf.train.Saver()
     sess.run(tf.global_variables_initializer())
     ckpt = tf.train.get_checkpoint_state(CHECKPOINT_DIR)
@@ -147,7 +147,7 @@ def main():
         saver.restore(sess, ckpt.model_checkpoint_path)
     if not os.path.isdir(TEST_RESULT_DIR):
         os.makedirs(TEST_RESULT_DIR)
-    
+
     for i, file0 in enumerate(in_paths):
         t0 = time.time()
         # raw = vread(file0)
