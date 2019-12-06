@@ -99,15 +99,19 @@ In addition to the Baseline model, we also exprimented several optimization meth
 
 ### Approach 1 Batch Update
 
+See [Batch Branch](https://github.com/MichaelHYJiang/csci566-Ocean-s-Five/tree/batch) for code and details.
 Baseline updates loss for one sample in an iteration (i.e. similar to SGD). We modify network and train process to make the code suitable for mini-batch weight update. Due to the memory limitation, we only test batch size <= 23. Mini-batch gradient descent converges to a smaller noise ball compared to SGD.
 
 **Results** 
 
 |Batch Size | Final Loss | Final Validation Loss | PSNR | SSIM | MSE (MABD) Level: 10^-3 |
 | --- | --- | --- | --- | --- | --- |
-| 1 (baseline) | 0.029254 | 0.031946 | 27.203 | 0.83994 | 0.72762 |
+| baseline | 0.029254 | 0.031946 | 27.203 | 0.83994 | 0.72762 |
+| 1  | 0.030137 | 0.037942 | 26.301 | 0.82867 | 0.56897|
 | 10 | 0.24857 | 0.21656 | 12.412 | 0.42548 | 8.0073|
 | 23 | 0.25735 | 0.23038 | 11.785 | 0.36570 | 8.0329|
+* Baseline is using original network and training process without batch size. Epoch = 60, Group number = 12
+* Batch size = 1, 10, 23 are using modified network with mini-batch weight update. For memory and time limitation, we set epoch = 30, group number = 5. Other parameters are the same as baseline.
 
 **Conclusions** 
 * Use batch size > 1 can speed up the training process. (batch size = 10 is 2 times faster than baseline)
